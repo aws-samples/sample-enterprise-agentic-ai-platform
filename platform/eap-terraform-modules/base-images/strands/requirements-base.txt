@@ -37,4 +37,4 @@ python-json-logger>=2.0.0
 # integration (memory/integrations/strands: config.py + session_manager.py) and
 # only requires strands-agents>=1.1.0, so it is compatible with the pinned
 # strands-agents==1.32.0 above and preserves ADE long-term memory.
-bedrock-agentcore[strands-agents]==1.4.7
+bedrock-agentcore[strands-agents]==1.18.1
