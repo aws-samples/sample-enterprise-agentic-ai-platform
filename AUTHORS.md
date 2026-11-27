@@ -6,6 +6,8 @@ Enterprise Agentic AI Platform (EAP) are the work of:
 - **Vikrant Dhir**, Principal Solutions Architect, Amazon Web Services
   &lt;vikdhir@amazon.com&gt; — original author: concept, platform architecture and
   design, and implementation.
+- **Mahesh Biradar**, Sr. Solutions Architect, Amazon Web Services
+  &lt;mbbirad@amazon.com&gt; — co-author.
 
 ## Notes on attribution
 

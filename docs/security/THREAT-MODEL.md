@@ -62,7 +62,7 @@ Both presets run agents inside a VPC (`agent_network_mode = "VPC"`, the default,
 ### References
 
 - Code Repo: `<aws-samples repository URL, once published>`
-- Project Team: Vikrant Dhir (vikdhir), Principal Solutions Architect
+- Project Team: Vikrant Dhir (vikdhir), Principal Solutions Architect; Mahesh Biradar (mbbirad), Sr. Solutions Architect
 - CSR Link: `<CSR ticket link, once created>`
 - SFDC Opportunity Link: N/A (public 1:M asset)
 - Other documentation:

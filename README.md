@@ -601,7 +601,9 @@ and nothing is deployed until they approve
 ## Authors
 
 Concept, architecture/design, and implementation by **Vikrant Dhir**, Principal
-Solutions Architect, Amazon Web Services (<vikdhir@amazon.com>).
+Solutions Architect, Amazon Web Services (<vikdhir@amazon.com>), with co-author
+**Mahesh Biradar**, Sr. Solutions Architect, Amazon Web Services
+(<mbbirad@amazon.com>).
 See [`AUTHORS.md`](./AUTHORS.md) for details. Third-party and derived works are
 attributed in [`NOTICE`](./NOTICE).
 
