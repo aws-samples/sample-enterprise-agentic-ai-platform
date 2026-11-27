@@ -11,7 +11,7 @@
 # serve_at_root=, enable_a2a_compliant_streaming=) with a memory session_manager.
 # Keep these pinned together; bump only alongside an entrypoint.py agent_factory
 # migration.
-strands-agents[a2a]==1.32.0
+strands-agents[a2a]==1.48.0
 strands-agents-tools==0.2.23
 
 # AWS SDK — Bedrock model invocation
@@ -36,5 +36,5 @@ python-json-logger>=2.0.0
 # Pinned to the repo-initiation era (2026-03-20). 1.4.7 ships the Strands memory
 # integration (memory/integrations/strands: config.py + session_manager.py) and
 # only requires strands-agents>=1.1.0, so it is compatible with the pinned
-# strands-agents==1.32.0 above and preserves ADE long-term memory.
+# strands-agents==1.48.0 above and preserves ADE long-term memory.
 bedrock-agentcore[strands-agents]==1.4.7
