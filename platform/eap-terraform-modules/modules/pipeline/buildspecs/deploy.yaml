@@ -1,0 +1,115 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      # Managed image (amazonlinux2-x86_64-standard:4.0) ships aws-cli + python3;
+      # install the pinned Terraform here (was previously baked into the custom
+      # eap-terraform:1.5 image).
+      - TERRAFORM_VERSION=1.5.7
+      - curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o /tmp/terraform.zip
+      - unzip -o /tmp/terraform.zip -d /usr/local/bin
+      - terraform version
+  pre_build:
+    commands:
+      - echo "=== Downloading platform deploy-template from S3 ==="
+      - mkdir -p _deploy/runtime _deploy/memory _deploy/evaluations
+      # Orchestration module at ../../orchestration relative to _deploy/
+      # (deploy-template references source = "../../orchestration")
+      - mkdir -p _deploy/../../orchestration
+      - aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/orchestration/ _deploy/../../orchestration/ --recursive 2>/dev/null || echo "INFO - orchestration module not yet uploaded to S3"
+      - aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/deploy-template/ _deploy/ --recursive
+      - echo "=== Deploy template files ==="
+      - ls -la _deploy/
+      - ls -la _deploy/runtime/
+  build:
+    commands:
+      - echo "=== Copying all manifests into deploy workspace ==="
+      - |
+        # Content-driven: find all application.yaml and agent.yaml, copy preserving hierarchy.
+        # Folder names don't matter — presence of application.yaml = multi-agent app.
+        for f in $(find . -name "application.yaml" -not -path "./_deploy/*" 2>/dev/null); do
+          d=$(dirname "$f"); mkdir -p "_deploy/$d"; cp "$f" "_deploy/$d/"
+        done
+        for f in $(find . -name "agent.yaml" -not -path "./_deploy/*" 2>/dev/null); do
+          d=$(dirname "$f"); mkdir -p "_deploy/$d"; cp "$f" "_deploy/$d/"
+          cp "$d/agent-card.yaml" "_deploy/$d/" 2>/dev/null || true
+        done
+      - find _deploy -name "*.yaml" -not -path "_deploy/runtime/*" -not -path "_deploy/memory/*" -not -path "_deploy/evaluations/*" || echo "WARNING - no YAML manifests found in _deploy"
+      - cd _deploy && terraform init -backend-config="bucket=$ARTIFACTS_BUCKET" -backend-config="key=_tfstate/deploy.tfstate" -backend-config="region=$AWS_DEFAULT_REGION" && echo "=== Terraform Plan ===" && terraform plan -out=tfplan -input=false && echo "=== Terraform Apply ===" && terraform apply -auto-approve -input=false tfplan
+      # -----------------------------------------------------------------------
+      # Record deployed-agent state to the SINGLE shared lifecycle DynamoDB table
+      # (single source of truth for the console). Reads the deploy-template's
+      # `deployed_agents` output (runtime ARN, app grouping, entrypoint, per-app
+      # topology) and merge-upserts each item, stamping `bu` + deployed_by.
+      # Non-fatal: a recording hiccup must not fail an otherwise-successful deploy.
+      # -----------------------------------------------------------------------
+      - echo "=== Recording deployed-agent state to DynamoDB ($LIFECYCLE_TABLE, bu=$BU) ==="
+      - terraform output -json deployed_agents > /tmp/deployed_agents.json 2>/dev/null || echo "[]" > /tmp/deployed_agents.json
+      - cd "$CODEBUILD_SRC_DIR"
+      - |
+        cat > /tmp/record_deployed_agents.py <<'PYEOF'
+        import json, os, subprocess, sys
+
+        table  = os.environ.get("LIFECYCLE_TABLE", "")
+        bu     = os.environ.get("BU", "")
+        region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+
+        if not table:
+            print("LIFECYCLE_TABLE unset; skipping deployed-agent state record")
+            sys.exit(0)
+        try:
+            records = json.load(open("/tmp/deployed_agents.json"))
+        except Exception as e:  # noqa
+            print("no deployed_agents output (%s); skipping" % e)
+            sys.exit(0)
+        if not records:
+            print("no deployed-agent records to write")
+            sys.exit(0)
+
+        expr = (
+            "SET app_name=:app, agent_key=:ak, agent_role=:ar, pattern=:pat, "
+            "runtime_arn=:arn, state_machine_arn=:sfn, runtime_name=:rn, "
+            "endpoint_qualifier=:eq, #st=:st, is_entrypoint=:ep, "
+            "deployed_by=:db, bu=:bu, app_topology=:topo"
+        )
+        count = 0
+        for r in records:
+            name = r.get("agent_name", "")
+            if not name:
+                continue
+            key = {"agent_name": {"S": name}}
+            names = {"#st": "status"}
+            vals = {
+                ":app":  {"S": r.get("app_name", "")},
+                ":ak":   {"S": r.get("agent_key", "")},
+                ":ar":   {"S": r.get("agent_role", "")},
+                ":pat":  {"S": r.get("pattern", "")},
+                ":arn":  {"S": r.get("runtime_arn", "")},
+                ":sfn":  {"S": r.get("state_machine_arn", "")},
+                ":rn":   {"S": name},
+                ":eq":   {"S": r.get("endpoint_qualifier", "")},
+                ":st":   {"S": "DEPLOYED"},
+                ":ep":   {"BOOL": bool(r.get("is_entrypoint", False))},
+                ":db":   {"S": "pipeline"},
+                ":bu":   {"S": bu},
+                ":topo": {"S": r.get("app_topology", "")},
+            }
+            subprocess.run(
+                [
+                    "aws", "dynamodb", "update-item", "--region", region,
+                    "--table-name", table,
+                    "--key", json.dumps(key),
+                    "--update-expression", expr,
+                    "--expression-attribute-names", json.dumps(names),
+                    "--expression-attribute-values", json.dumps(vals),
+                ],
+                check=True,
+            )
+            count += 1
+        print("recorded %d deployed-agent items into %s (bu=%s)" % (count, table, bu))
+        PYEOF
+      - python3 /tmp/record_deployed_agents.py || echo "WARN - failed to record deployed-agent state (non-fatal)"
+artifacts:
+  files:
+    - '**/*'
+  base-directory: _deploy

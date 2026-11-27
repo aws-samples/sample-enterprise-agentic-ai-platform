@@ -1,0 +1,40 @@
+# EAP Base Image — Python dependencies
+# Strands framework + platform horizontals
+
+# Framework
+# PINNED to the repo-initiation era (2026-03-20). Newer Strands (1.4x+) changed
+# the A2AServer contract to reject a single `agent` that carries a
+# session_manager (requires the `agent_factory` pattern), which crash-loops the
+# memory-enabled Studio/ADE agent on startup:
+#   ValueError: A single 'agent' with a session_manager is not supported ...
+# 1.32.0 is the last-known-good line that accepts A2AServer(agent=, http_url=,
+# serve_at_root=, enable_a2a_compliant_streaming=) with a memory session_manager.
+# Keep these pinned together; bump only alongside an entrypoint.py agent_factory
+# migration.
+strands-agents[a2a]==1.32.0
+strands-agents-tools==0.2.23
+
+# AWS SDK — Bedrock model invocation
+boto3>=1.35.0
+
+# Observability (Component 3) — AWS-native AgentCore Observability
+# ADOT (AWS Distro for OpenTelemetry) bundles the OTLP exporter + AWS configurator,
+# routing GenAI spans/traces to CloudWatch GenAI Observability + X-Ray Transaction Search.
+# On AgentCore Runtime, export is auto-configured by the runtime (no OTLP endpoint wiring).
+aws-opentelemetry-distro>=0.10.0
+
+# Protocol layers (Component 2) — A2A via strands SDK, FastAPI for /ping + mounting
+fastapi>=0.115.0
+uvicorn>=0.30.0
+httpx>=0.27.0
+pyyaml>=6.0
+
+# Structured logging (Component 5)
+python-json-logger>=2.0.0
+
+# AgentCore SDK — memory, identity, gateway integrations
+# Pinned to the repo-initiation era (2026-03-20). 1.4.7 ships the Strands memory
+# integration (memory/integrations/strands: config.py + session_manager.py) and
+# only requires strands-agents>=1.1.0, so it is compatible with the pinned
+# strands-agents==1.32.0 above and preserves ADE long-term memory.
+bedrock-agentcore[strands-agents]==1.4.7

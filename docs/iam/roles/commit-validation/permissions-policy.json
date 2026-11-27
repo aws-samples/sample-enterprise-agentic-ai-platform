@@ -1,0 +1,50 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": ["arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/lambda/eap-commit-validation:*"]
+    },
+    {
+      "Sid": "CodeCommitRead",
+      "Effect": "Allow",
+      "Action": ["codecommit:GetCommit", "codecommit:GetRepository"],
+      "Resource": ["<CODECOMMIT_REPO_ARNS>"]
+    },
+    {
+      "Sid": "CloudWatchPutMetric",
+      "Effect": "Allow",
+      "Action": ["cloudwatch:PutMetricData"],
+      "Resource": ["*"],
+      "Condition": { "StringEquals": { "cloudwatch:namespace": "EAP/CommitValidation" } }
+    },
+    {
+      "Sid": "LambdaVpcEniCreate",
+      "Effect": "Allow",
+      "Action": ["ec2:CreateNetworkInterface"],
+      "Resource": [
+        "arn:<PARTITION>:ec2:<REGION>:<ACCOUNT_ID>:network-interface/*",
+        "arn:<PARTITION>:ec2:<REGION>:<ACCOUNT_ID>:subnet/*",
+        "arn:<PARTITION>:ec2:<REGION>:<ACCOUNT_ID>:security-group/*"
+      ]
+    },
+    {
+      "Sid": "LambdaVpcEniManage",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DeleteNetworkInterface",
+        "ec2:AssignPrivateIpAddresses",
+        "ec2:UnassignPrivateIpAddresses"
+      ],
+      "Resource": "arn:<PARTITION>:ec2:<REGION>:<ACCOUNT_ID>:network-interface/*"
+    },
+    {
+      "Sid": "LambdaVpcEniDescribe",
+      "Effect": "Allow",
+      "Action": ["ec2:DescribeNetworkInterfaces"],
+      "Resource": "*"
+    }
+  ]
+}

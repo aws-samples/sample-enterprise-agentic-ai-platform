@@ -1,0 +1,12 @@
+# Extractor Agent — Step 1 of A2A chain
+# Extracts structured facts from raw text input.
+# Entry point of UC1 pipeline. Calls enricher via A2A after extraction.
+# Future: orchestration via Step Functions or EventBridge (workflow.yaml)
+
+name: extractor
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+
+protocols: [a2a]
+role: worker
+calls: [enricher]

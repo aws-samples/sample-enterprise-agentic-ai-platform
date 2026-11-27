@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "method": "message/send",
+  "id": "card-001",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "kind": "text",
+          "text": "Describe your capabilities and what you can help with."
+        }
+      ],
+      "messageId": "msg-card-001"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Application: Data Pipeline
+# Architecture: Sequential Workflow
+# Agents execute in order: extractor → enricher → summarizer
+# Orchestration: Step Functions (platform-managed) — optional.
+#   The platform generates a sequential state machine from the steps/depends_on graph.
+#   Set orchestration: a2a to have agents chain themselves via A2A handoffs.
+
+name: data-pipeline-app
+architecture: sequential-workflow
+description: Multi-agent data processing — extract, enrich, summarize
+orchestration: step-functions  # options: step-functions | a2a | none (default: none)
+
+steps:
+  - name: extractor
+    description: Extracts raw data from sources
+  - name: enricher
+    description: Enriches extracted data with additional context
+    depends_on: [extractor]
+  - name: summarizer
+    description: Summarizes enriched data into final output
+    depends_on: [enricher]

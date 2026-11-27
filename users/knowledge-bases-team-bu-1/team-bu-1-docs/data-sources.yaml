@@ -1,0 +1,12 @@
+# Data sources for the team-bu-1-docs knowledge base.
+# Each entry is provisioned as a Bedrock data source by the kb-deploy template.
+#
+# Supported types: s3, web_crawl, confluence, sharepoint, salesforce, custom
+# This baseline declares a single platform-managed S3 bucket (create_bucket: true),
+# provisioned as "<domain>-<kb_name>-datasource-<account_id>" (team-bu-1-team-bu-1-docs-datasource-<account_id>).
+
+data_sources:
+  - name: docs-bucket
+    type: s3
+    description: Platform-managed S3 bucket for team-bu-1 documentation uploads.
+    create_bucket: true

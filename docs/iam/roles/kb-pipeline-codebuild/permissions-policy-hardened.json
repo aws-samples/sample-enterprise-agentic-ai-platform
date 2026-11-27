@@ -1,0 +1,112 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ArtifactsBucket",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:ListBucket", "s3:DeleteObject"],
+      "Resource": ["<ARTIFACTS_BUCKET_ARN>", "<ARTIFACTS_BUCKET_ARN>/*"]
+    },
+    {
+      "Sid": "PlatformStateBucket",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:ListBucket", "s3:DeleteObject"],
+      "Resource": [
+        "arn:<PARTITION>:s3:::<PLATFORM_STATE_BUCKET>",
+        "arn:<PARTITION>:s3:::<PLATFORM_STATE_BUCKET>/*"
+      ]
+    },
+    {
+      "Sid": "DatasourceBuckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:PutBucketVersioning",
+        "s3:PutEncryptionConfiguration",
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:PutObject",
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "arn:<PARTITION>:s3:::<DOMAIN>-*-datasource-<ACCOUNT_ID>",
+        "arn:<PARTITION>:s3:::<DOMAIN>-*-datasource-<ACCOUNT_ID>/*"
+      ]
+    },
+    {
+      "Sid": "BedrockKnowledgeBaseCreateRequiresWildcard",
+      "Effect": "Allow",
+      "Action": ["bedrock:CreateKnowledgeBase"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "BedrockKnowledgeBases",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:GetKnowledgeBase",
+        "bedrock:UpdateKnowledgeBase",
+        "bedrock:DeleteKnowledgeBase",
+        "bedrock:CreateDataSource",
+        "bedrock:GetDataSource",
+        "bedrock:UpdateDataSource",
+        "bedrock:DeleteDataSource",
+        "bedrock:ListDataSources",
+        "bedrock:StartIngestionJob",
+        "bedrock:TagResource",
+        "bedrock:UntagResource",
+        "bedrock:ListTagsForResource"
+      ],
+      "Resource": ["arn:<PARTITION>:bedrock:<REGION>:<ACCOUNT_ID>:knowledge-base/*"]
+    },
+    {
+      "Sid": "AgentCoreGatewayTargets",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:CreateGatewayTarget",
+        "bedrock-agentcore:GetGatewayTarget",
+        "bedrock-agentcore:UpdateGatewayTarget",
+        "bedrock-agentcore:DeleteGatewayTarget",
+        "bedrock-agentcore:SynchronizeGatewayTargets"
+      ],
+      "Resource": ["arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:gateway/*"]
+    },
+    {
+      "Sid": "AgentCorePolicyEnginePolicies",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:CreatePolicy",
+        "bedrock-agentcore:GetPolicy",
+        "bedrock-agentcore:UpdatePolicy",
+        "bedrock-agentcore:DeletePolicy"
+      ],
+      "Resource": [
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:policy-engine/*",
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:policy-engine/*/policy/*"
+      ]
+    },
+    {
+      "Sid": "SecretsManagerRead",
+      "Effect": "Allow",
+      "Action": ["secretsmanager:GetSecretValue"],
+      "Resource": ["arn:<PARTITION>:secretsmanager:<REGION>:<ACCOUNT_ID>:secret:eap-*"]
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": ["arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/codebuild/<NAME>-*"]
+    },
+    {
+      "Sid": "EcrAuth",
+      "Effect": "Allow",
+      "Action": ["ecr:GetAuthorizationToken"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "EcrImage",
+      "Effect": "Allow",
+      "Action": ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"],
+      "Resource": ["arn:<PARTITION>:ecr:<REGION>:<ACCOUNT_ID>:repository/eap-*"]
+    }
+  ]
+}

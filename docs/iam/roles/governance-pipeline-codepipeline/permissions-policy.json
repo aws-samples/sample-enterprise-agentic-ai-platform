@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:*"],
+      "Resource": ["<ARTIFACTS_BUCKET_ARN>", "<ARTIFACTS_BUCKET_ARN>/*"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "codecommit:GetBranch",
+        "codecommit:GetCommit",
+        "codecommit:UploadArchive",
+        "codecommit:GetUploadArchiveStatus",
+        "codecommit:CancelUploadArchive"
+      ],
+      "Resource": ["arn:<PARTITION>:codecommit:<REGION>:<ACCOUNT_ID>:<REPOSITORY_NAME>"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["codebuild:StartBuild", "codebuild:BatchGetBuilds"],
+      "Resource": ["arn:<PARTITION>:codebuild:<REGION>:<ACCOUNT_ID>:project/<NAME>-deploy"]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "eap-examples-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Generic, example-agnostic signer service for the demo console Examples surface (ADR-037). Collapses the six demo-ui server.ts backends into one Fargate container: SigV4 AgentCore invoke + Step Functions + CloudWatch logs.",
+  "author": "Vikrant Dhir <vikdhir@amazon.com>",
+  "scripts": {
+    "dev": "tsx watch server.ts",
+    "start": "tsx server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.600.0",
+    "@aws-sdk/client-dynamodb": "^3.1177.0",
+    "@aws-sdk/client-sfn": "^3.600.0",
+    "@aws-sdk/credential-providers": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.1177.0",
+    "@smithy/protocol-http": "^5.1.0",
+    "@smithy/signature-v4": "^5.1.0",
+    "aws-jwt-verify": "^5.2.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "tsx": "^4.16.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.2"
+  }
+}

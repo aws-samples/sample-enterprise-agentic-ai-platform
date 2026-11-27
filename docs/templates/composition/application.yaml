@@ -1,0 +1,56 @@
+# application.yaml — Multi-Agent Application Manifest
+# Required for multi-agent architectures (supervisor, sequential-workflow, router, parallel).
+# Not needed for standalone-agent-pattern (agent.yaml is sufficient).
+#
+# This file defines the application topology — which agents participate
+# and how they connect. The platform provisions all agents and wires
+# A2A routing via Gateway.
+#
+# One Cognito app client is created per application (user auth only).
+
+# Application name — must be unique within the BU
+name: my-app
+
+# Architecture type — must match the parent folder pattern
+# Valid: supervisor, sequential-workflow, router, parallel
+architecture: supervisor
+
+# Human-readable description
+description: Description of what this application does
+
+# Agent topology — varies by architecture:
+
+# --- Supervisor architecture ---
+# agents:
+#   - name: supervisor
+#     role: orchestrator
+#     calls: [worker-a, worker-b]
+#   - name: worker-a
+#     role: worker
+#     called_by: [supervisor]
+#   - name: worker-b
+#     role: worker
+#     called_by: [supervisor]
+
+# --- Sequential Workflow architecture ---
+# steps:
+#   - name: step-1-agent
+#     description: First step
+#   - name: step-2-agent
+#     description: Second step
+#     depends_on: [step-1-agent]
+#   - name: step-3-agent
+#     description: Third step
+#     depends_on: [step-2-agent]
+
+# --- Router architecture ---
+# agents:
+#   - name: classifier
+#     role: router
+#     routes_to: [handler-a, handler-b]
+#   - name: handler-a
+#     role: handler
+#     handles: [category-a]
+#   - name: handler-b
+#     role: handler
+#     handles: [category-b]

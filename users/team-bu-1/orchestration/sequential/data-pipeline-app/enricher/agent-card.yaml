@@ -1,0 +1,44 @@
+# Enricher Agent — Step 2
+# Enriches extracted facts with categories and context.
+
+name: enricher-agent
+description: >
+  Enriches extracted facts with category labels, relevance scores,
+  and contextual information for downstream summarization.
+
+version: "1.0.0"
+
+capabilities:
+  - name: enrich-facts
+    description: Adds categories, relevance scores, and context to extracted facts.
+
+protocols:
+  - a2a
+
+input_schema:
+  type: object
+  properties:
+    facts:
+      type: array
+      description: Extracted facts from the extractor agent.
+  required:
+    - facts
+
+output_schema:
+  type: object
+  properties:
+    enriched_facts:
+      type: array
+      items:
+        type: object
+        properties:
+          key:
+            type: string
+          value:
+            type: string
+          category:
+            type: string
+          relevance:
+            type: number
+          context:
+            type: string

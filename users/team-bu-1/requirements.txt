@@ -1,0 +1,3 @@
+# Agent-specific Python dependencies.
+# The base image already includes: Strands SDK, bedrock-agentcore, OTel, and protocol libraries.
+# Add only your agent's additional dependencies here.

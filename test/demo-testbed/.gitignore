@@ -1,0 +1,7 @@
+# Local Terraform state + plans (per-account, ephemeral). The demo bed has no
+# fixtures, but keep these ignores for symmetry / any scratch state.
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/tfplan

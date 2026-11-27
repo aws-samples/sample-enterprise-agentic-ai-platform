@@ -1,0 +1,35 @@
+# Example MCP server targets (uncomment and customize)
+#
+# MCP servers must have a hosted HTTP/HTTPS endpoint.
+# stdio-based servers go in rest-api/ instead.
+#
+# --- No auth (public endpoint) ---
+#
+# name: aws-knowledge
+# type: mcp_server
+# description: AWS documentation search
+# endpoint: https://knowledge-mcp.global.api.aws
+#
+# --- With API key auth ---
+#
+# name: internal-data-catalog
+# type: mcp_server
+# description: Internal data catalog with API key auth
+# endpoint: https://data-catalog-mcp.internal.example.com
+# credential_type: api_key
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:data-catalog-key
+#   credential_location: HEADER
+#   credential_parameter_name: x-api-key
+#
+# --- With OAuth (3LO — user-level entitlements) ---
+#
+# name: snowflake-mcp
+# type: mcp_server
+# description: Snowflake MCP server with user-level data entitlements
+# endpoint: https://snowflake-mcp.internal.example.com
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:snowflake-oauth
+#   scopes: [session:role:analyst, refresh_token]
+#   grant_type: authorization_code

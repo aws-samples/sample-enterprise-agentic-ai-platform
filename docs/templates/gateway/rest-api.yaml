@@ -1,0 +1,53 @@
+# REST API Target Template
+# Owner: Shared Services Team
+#
+# Registers a REST API with AgentCore Gateway.
+# Gateway natively wraps REST APIs as MCP tools — no Lambda needed.
+# Gateway auto-imports the OpenAPI spec from API Gateway.
+#
+# stdio-based MCP servers that don't have hosted endpoints
+# should be deployed as REST APIs and registered here.
+
+name: my-rest-api
+type: rest_api
+description: What this API provides and which operations are exposed as tools
+
+# API Gateway REST API stage
+api_gateway:
+  api_id: abc123def    # API Gateway REST API ID
+  stage: prod          # Stage name
+
+# Tool filters — select which operations to expose as MCP tools
+# Uses path + method combinations. Supports wildcards.
+tool_filters:
+  - path: /resources
+    method: GET
+  - path: /resources/*
+    method: GET
+  - path: /resources
+    method: POST
+
+# Tool overrides — customize tool names/descriptions (optional)
+# tool_overrides:
+#   - path: /resources
+#     method: GET
+#     name: list_resources
+#     description: List all available resources
+
+# Outbound auth — how Gateway authenticates to this API
+# Options: gateway_iam_role (default), api_key, oauth
+credential_type: gateway_iam_role
+
+# --- API key auth ---
+# credential_type: api_key
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:my-api-key
+#   credential_location: HEADER
+#   credential_parameter_name: x-api-key
+
+# --- OAuth auth (service-level, not user-level) ---
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:my-oauth
+#   scopes: [api.read]
+#   grant_type: client_credentials

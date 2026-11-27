@@ -1,0 +1,26 @@
+# KB Pipeline — Validate buildspec
+# Invokes validate_kb_repo.py to schema-validate kb.yaml and data-sources.yaml
+# for each KB directory in the repo.
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install pyyaml --quiet
+  build:
+    commands:
+      - echo "=== KB Repo Validation ==="
+      - echo "Domain = $DOMAIN"
+      - |
+        # Download validation scripts from S3 artifacts bucket
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/scripts/validate_kb_repo.py /tmp/validate_kb_repo.py
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/scripts/validate_kb_yaml.py /tmp/validate_kb_yaml.py
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/scripts/validate_data_sources_yaml.py /tmp/validate_data_sources_yaml.py
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/scripts/validate_sync_schedule.py /tmp/validate_sync_schedule.py
+      - python3 /tmp/validate_kb_repo.py "$CODEBUILD_SRC_DIR"
+      - echo "=== Validation passed ==="
+artifacts:
+  files:
+    - '**/*'

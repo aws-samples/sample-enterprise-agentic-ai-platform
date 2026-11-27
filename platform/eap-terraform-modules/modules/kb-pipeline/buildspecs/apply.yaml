@@ -1,0 +1,67 @@
+# KB Pipeline — Apply buildspec
+# Runs terraform apply, then triggers initial data source sync.
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install pyyaml boto3 --quiet
+      # Managed image has aws CLI + python but no terraform — install it.
+      - |
+        TF_VERSION=1.5.7
+        curl -sSL -o /tmp/tf.zip "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+        unzip -o -q /tmp/tf.zip -d /usr/local/bin/
+        terraform version
+  pre_build:
+    commands:
+      - echo "=== Setting up KB deploy workspace ==="
+      - export COMMIT_SHA=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - export TF_VAR_commit_sha=$COMMIT_SHA
+      - export TF_VAR_gateway_id=$GATEWAY_ID
+      - export TF_VAR_policy_engine_id=$POLICY_ENGINE_ID
+      - |
+        # Copy the kb-deploy template from S3
+        mkdir -p /tmp/kb-deploy
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/kb-deploy-template/ /tmp/kb-deploy/ --recursive
+      - |
+        # Copy source KB configs into the deploy template directory
+        cp -r */ /tmp/kb-deploy/ 2>/dev/null || true
+  build:
+    commands:
+      - echo "=== Terraform Apply ==="
+      - cd /tmp/kb-deploy
+      - |
+        terraform init \
+          -backend-config="bucket=$TF_VAR_platform_state_bucket" \
+          -backend-config="key=kb-pipeline/${TF_VAR_domain}/terraform.tfstate" \
+          -backend-config="region=$TF_VAR_aws_region"
+      - terraform apply -auto-approve -input=false
+      - echo "=== Terraform apply complete ==="
+  post_build:
+    commands:
+      - echo "=== Triggering initial data source sync ==="
+      - cd /tmp/kb-deploy
+      - |
+        # Extract KB IDs and data source IDs from Terraform outputs and trigger sync
+        KB_ARNS=$(terraform output -json kb_arns 2>/dev/null || echo "{}")
+        if [ "$KB_ARNS" != "{}" ]; then
+          for kb_name in $(echo "$KB_ARNS" | python3 -c "import sys,json; [print(k) for k in json.load(sys.stdin)]"); do
+            KB_ID=$(echo "$KB_ARNS" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['$kb_name'].split('/')[-1])")
+            echo "Triggering sync for KB: $kb_name (ID: $KB_ID)"
+            # List data sources for this KB and start ingestion
+            DS_IDS=$(aws bedrock-agent list-data-sources --knowledge-base-id "$KB_ID" --query "dataSourceSummaries[].dataSourceId" --output text --region "$TF_VAR_aws_region" 2>/dev/null || echo "")
+            for ds_id in $DS_IDS; do
+              echo "  Starting ingestion job for data source: $ds_id"
+              aws bedrock-agent start-ingestion-job \
+                --knowledge-base-id "$KB_ID" \
+                --data-source-id "$ds_id" \
+                --region "$TF_VAR_aws_region" || echo "  WARNING: Failed to start sync for $ds_id (non-fatal)"
+            done
+          done
+        fi
+      - echo "=== Sync trigger complete ==="
+artifacts:
+  files:
+    - '**/*'

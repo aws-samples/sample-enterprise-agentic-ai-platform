@@ -1,0 +1,29 @@
+# Knowledge Base: team-bu-1-docs
+# Baseline KB config for the team-bu-1 domain.
+# Consumed by the kb-team-bu-1-deploy pipeline (Validate → Plan → Apply)
+# via the kb-deploy Terraform template.
+
+name: team-bu-1-docs
+description: Baseline knowledge base for team-bu-1 documentation and reference material.
+
+# Bedrock embedding model (resolved to arn:aws:bedrock:<region>::foundation-model/<embedding_model>)
+embedding_model: amazon.titan-embed-text-v2:0
+
+chunking_strategy:
+  type: fixed_size
+
+# Predefined interval (daily|weekly|monthly) or an AWS cron() expression
+sync_schedule: daily
+
+retrieval:
+  search_type: hybrid
+  max_results: 5
+
+# Restrict retrieval to callers in the team-bu-1 domain (default-deny otherwise)
+access:
+  allowed_domains:
+    - team-bu-1
+
+tags:
+  domain: team-bu-1
+  managed_by: kb-team-bu-1-deploy

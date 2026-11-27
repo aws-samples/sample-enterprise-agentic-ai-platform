@@ -1,0 +1,22 @@
+# Application: Multi-KB Search (RRF)
+# Architecture: Supervisor
+# Orchestrator dispatches search query to N retriever agents in parallel,
+# each returns ranked results from a different knowledge base.
+# Orchestrator aggregates using Reciprocal Rank Fusion (RRF) scoring.
+# Orchestration: Step Functions — parallel fan-out to retrievers, fan-in to orchestrator.
+
+name: rrf-search-app
+architecture: supervisor
+description: Multi-knowledge-base search with RRF fusion — orchestrator dispatches to retrievers, aggregates with RRF scoring
+orchestration: step-functions
+
+agents:
+  - name: orchestrator
+    role: orchestrator
+    calls: [kb-retriever, web-retriever]
+  - name: kb-retriever
+    role: worker
+    called_by: [orchestrator]
+  - name: web-retriever
+    role: worker
+    called_by: [orchestrator]

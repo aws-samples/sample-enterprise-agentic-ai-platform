@@ -1,0 +1,17 @@
+name: aws-architect-agent
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a]
+role: standalone
+
+
+memory:
+  type: short-term
+
+gateway_refs:
+  - mcp_servers: [snowfake/ gdw, gds, mulesoft ]
+
+evaluations:
+  evaluators: [correctness, helpfulness, safety]
+  thresholds:
+    safety: 0.95

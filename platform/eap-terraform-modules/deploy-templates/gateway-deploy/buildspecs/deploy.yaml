@@ -1,0 +1,37 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      # Managed image (amazonlinux2-x86_64-standard:4.0) ships aws-cli v2 + python3;
+      # install the pinned Terraform here (was previously baked into the custom
+      # eap-terraform:1.5 image).
+      - TERRAFORM_VERSION=1.5.7
+      - curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o /tmp/terraform.zip
+      - unzip -o /tmp/terraform.zip -d /usr/local/bin
+      - terraform version
+  pre_build:
+    commands:
+      - echo "=== Downloading gateway deploy-template from S3 ==="
+      - mkdir -p _deploy
+      - aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/gateway-deploy-template/ _deploy/ --recursive
+      - echo "=== Copying integration YAML from repo ==="
+      - cp -r mcp/ _deploy/mcp/ 2>/dev/null || echo "No mcp directory"
+      - cp -r rest-api/ _deploy/rest-api/ 2>/dev/null || echo "No rest-api directory"
+      - cp -r lambda/ _deploy/lambda/ 2>/dev/null || echo "No lambda directory"
+      - ls -la _deploy/
+  build:
+    commands:
+      - cd _deploy
+      - terraform init -backend-config="bucket=$ARTIFACTS_BUCKET" -backend-config="key=_tfstate/gateway-deploy.tfstate" -backend-config="region=$AWS_DEFAULT_REGION"
+      - echo "=== Terraform Plan ==="
+      - terraform plan -out=tfplan -input=false
+      - echo "=== Terraform Apply ==="
+      - terraform apply -auto-approve -input=false tfplan
+  post_build:
+    commands:
+      - echo "=== Gateway Outputs ==="
+      - terraform output -json
+artifacts:
+  files:
+    - '**/*'
+  base-directory: _deploy

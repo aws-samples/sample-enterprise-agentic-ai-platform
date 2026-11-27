@@ -1,0 +1,41 @@
+# Extractor Agent — Step 1
+# Extracts structured facts from raw text.
+
+name: extractor-agent
+description: >
+  Extracts key facts, entities, and data points from raw text input.
+  Returns structured JSON for downstream processing.
+
+version: "1.0.0"
+
+capabilities:
+  - name: extract-facts
+    description: Parses raw text and extracts structured facts as JSON.
+
+protocols:
+  - a2a
+
+input_schema:
+  type: object
+  properties:
+    text:
+      type: string
+      description: Raw text to extract facts from.
+  required:
+    - text
+
+output_schema:
+  type: object
+  properties:
+    facts:
+      type: array
+      items:
+        type: object
+        properties:
+          key:
+            type: string
+          value:
+            type: string
+          confidence:
+            type: number
+      description: Extracted facts with confidence scores.

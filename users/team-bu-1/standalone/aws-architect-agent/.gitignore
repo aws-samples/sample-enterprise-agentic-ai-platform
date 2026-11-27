@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.log
+
+# OS
+.DS_Store
+
+# Output
+generated-diagrams/*
+!generated-diagrams/.gitkeep
+
+# Sessions
+agent/sessions/*
+!agent/sessions/.gitkeep

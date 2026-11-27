@@ -1,0 +1,6 @@
+name: writer
+description: Synthesizes findings into coherent responses, refines based on feedback
+capabilities:
+  - writing
+  - synthesis
+  - refinement

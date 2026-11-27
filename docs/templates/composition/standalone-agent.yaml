@@ -1,0 +1,23 @@
+# Composition Pattern: Full Agent
+# runtime + memory + gateway_refs + evaluations
+#
+# Agent with MCP tools, persistent memory, and quality monitoring.
+# This is the most common pattern for production agents.
+
+name: support-agent
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a, mcp]
+role: standalone
+
+memory:
+  type: long-term
+  retention: 90d
+
+gateway_refs:
+  - mcp_servers: [snowflake-warehouse, sharepoint-docs]
+
+evaluations:
+  evaluators: [correctness, helpfulness, safety]
+  thresholds:
+    safety: 0.95

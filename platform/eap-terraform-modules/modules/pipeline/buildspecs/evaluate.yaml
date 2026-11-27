@@ -1,0 +1,100 @@
+# evaluate.yaml — Agent School Evaluation Stage
+# Runs AgentCore Evaluations against deployed agent runtimes.
+# Outputs evaluation scores as JSON artifact for the Gate stage.
+#
+# Environment variables (injected by pipeline):
+#   ENVIRONMENT       - Target environment (dev, qa, uat, prod)
+#   DOMAIN            - EAP domain (e.g., team-bu-1)
+#   AGENT_NAMES       - Comma-separated list of agent names to evaluate
+#   RUNTIME_ARNS      - Comma-separated list of runtime ARNs (parallel to AGENT_NAMES)
+#   RED_TEAM_REQUIRED - "true" if red-team suite should run (typically qa/prod only)
+#   RED_TEAM_BUCKET   - S3 bucket containing red-team prompt sets
+
+version: 0.2
+
+env:
+  variables:
+    ENVIRONMENT: "dev"
+    DOMAIN: ""
+    AGENT_NAMES: ""
+    RUNTIME_ARNS: ""
+    RED_TEAM_REQUIRED: "false"
+    RED_TEAM_BUCKET: ""
+    TEST_CASES_BUCKET: ""
+    LIFECYCLE_TABLE: ""
+    IMAGE_TAG: ""
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install pyyaml boto3 --quiet
+      # Platform scripts don't travel in the app source artifact — fetch them
+      # from the artifacts bucket (uploaded by the pipeline module).
+      - echo "=== Fetching platform scripts from S3 ==="
+      - aws s3 cp "s3://${ARTIFACTS_BUCKET}/_platform/scripts/" scripts/ --recursive
+      - ls scripts/ | head
+
+  pre_build:
+    commands:
+      - echo "=== Agent School Evaluate Stage ==="
+      # NOTE: these echoes MUST be single-quoted — an unquoted "- echo \"X: Y\""
+      # is parsed by YAML as a mapping (key "X"), which CodeBuild rejects
+      # ("Expected Commands[N] to be of string type: found subkeys instead").
+      - 'echo "Environment: ${ENVIRONMENT}"'
+      - 'echo "Domain: ${DOMAIN}"'
+      - 'echo "Agents: ${AGENT_NAMES}"'
+      - 'echo "Red-team required: ${RED_TEAM_REQUIRED}"'
+      # Transition agents to "training" state
+      - |
+        if [ -n "${LIFECYCLE_TABLE}" ] && [ -n "${AGENT_NAMES}" ]; then
+          IFS=',' read -ra AGENTS <<< "${AGENT_NAMES}"
+          for agent in "${AGENTS[@]}"; do
+            agent=$(echo "$agent" | xargs)
+            python3 scripts/pipeline_lifecycle_hooks.py on_deploy_start \
+              --table "${LIFECYCLE_TABLE}" \
+              --agent "$agent" \
+              --image-tag "${IMAGE_TAG:-unknown}" \
+              --region "${AWS_DEFAULT_REGION:-us-east-1}" 2>/dev/null || true
+          done
+        fi
+
+  build:
+    commands:
+      - echo "Running AgentCore Evaluations..."
+      - |
+        python3 scripts/run_evaluations.py \
+          --environment "${ENVIRONMENT}" \
+          --domain "${DOMAIN}" \
+          --agent-names "${AGENT_NAMES}" \
+          --runtime-arns "${RUNTIME_ARNS}" \
+          --test-cases-bucket "${TEST_CASES_BUCKET}" \
+          --output evaluation-scores.json
+      - echo "Evaluation scores written to evaluation-scores.json"
+      - cat evaluation-scores.json | python3 -m json.tool
+      # Red-team suite (conditional — QA/Prod only)
+      - |
+        if [ "${RED_TEAM_REQUIRED}" = "true" ]; then
+          echo "Running red-team suite..."
+          python3 scripts/run_red_team.py \
+            --runtime-arns "${RUNTIME_ARNS}" \
+            --agent-names "${AGENT_NAMES}" \
+            --bucket "${RED_TEAM_BUCKET}" \
+            --output red-team-results.json
+          echo "Red-team results:"
+          cat red-team-results.json | python3 -m json.tool
+        else
+          echo "Red-team suite skipped (not required for ${ENVIRONMENT})"
+          echo '{"skipped": true}' > red-team-results.json
+        fi
+
+  post_build:
+    commands:
+      - echo "Evaluate stage complete"
+
+artifacts:
+  files:
+    - evaluation-scores.json
+    - red-team-results.json
+  discard-paths: yes

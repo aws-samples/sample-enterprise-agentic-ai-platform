@@ -1,0 +1,20 @@
+name: research-swarm
+architecture: swarm
+orchestration: a2a  # TODO: derive from architecture, drop orchestration field
+description: Collaborative research swarm — 3 peer agents brainstorm, critique, and refine answers iteratively via A2A handoffs
+
+agents:
+  - name: researcher
+    role: peer
+    can_call: [analyst, writer]
+    description: Gathers information, searches knowledge bases, identifies relevant sources
+
+  - name: analyst
+    role: peer
+    can_call: [researcher, writer]
+    description: Analyzes data, identifies patterns, critiques research findings
+
+  - name: writer
+    role: peer
+    can_call: [researcher, analyst]
+    description: Synthesizes findings into coherent responses, refines based on feedback

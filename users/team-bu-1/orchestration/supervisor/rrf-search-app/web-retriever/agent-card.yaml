@@ -1,0 +1,5 @@
+name: web-retriever
+description: Searches external web sources and documentation, returns ranked results
+capabilities:
+  - web-search
+  - documentation-retrieval

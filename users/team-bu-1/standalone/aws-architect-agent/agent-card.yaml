@@ -1,0 +1,23 @@
+name: aws-architect-agent
+description: >
+  GenAI AWS Solutions Architect agent. Designs comprehensive, Well-Architected
+  AWS solutions through collaborative conversation. Generates architecture diagrams,
+  cost analysis, and Well-Architected Framework assessments.
+url: "https://{runtime_endpoint}"
+version: "1.0.0"
+capabilities:
+  streaming: true
+  pushNotifications: false
+skills:
+  - id: architecture-design
+    name: Architecture Design
+    description: Designs AWS architectures with visual diagrams based on business requirements
+  - id: cost-analysis
+    name: Cost Analysis
+    description: Generates detailed AWS cost breakdowns and optimization recommendations
+  - id: well-architected-review
+    name: Well-Architected Review
+    description: Assesses architectures against all six AWS Well-Architected Framework pillars
+  - id: implementation-guidance
+    name: Implementation Guidance
+    description: Provides step-by-step implementation instructions with AWS documentation citations

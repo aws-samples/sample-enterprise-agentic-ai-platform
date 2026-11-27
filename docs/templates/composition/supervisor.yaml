@@ -1,0 +1,21 @@
+# Composition Pattern: Supervisor
+# runtime x2 (supervisor + specialist) via A2A
+#
+# Supervisor receives requests and delegates to specialists dynamically.
+# Each agent has its own runtime, identity, and observability.
+
+# --- Supervisor ---
+name: supervisor-agent
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a]
+role: supervisor
+calls:
+  - specialist-agent
+
+# --- Specialist (separate agent.yaml in its own directory) ---
+# name: specialist-agent
+# framework: strands
+# model_id: us.anthropic.claude-sonnet-5
+# protocols: [a2a]
+# role: specialist

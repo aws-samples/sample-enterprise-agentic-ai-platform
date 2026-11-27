@@ -1,0 +1,32 @@
+# Summarizer Agent — Step 3
+# Produces executive summary from enriched facts.
+
+name: summarizer-agent
+description: >
+  Produces a clear, concise executive summary from enriched facts.
+  Final step in the orchestrated extraction pipeline.
+
+version: "1.0.0"
+
+capabilities:
+  - name: summarize
+    description: Generates executive summary from enriched fact data.
+
+protocols:
+  - a2a
+
+input_schema:
+  type: object
+  properties:
+    enriched_facts:
+      type: array
+      description: Enriched facts from the enricher agent.
+  required:
+    - enriched_facts
+
+output_schema:
+  type: object
+  properties:
+    summary:
+      type: string
+      description: Human-readable executive summary.

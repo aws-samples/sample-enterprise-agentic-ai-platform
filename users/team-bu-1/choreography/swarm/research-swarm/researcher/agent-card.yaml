@@ -1,0 +1,5 @@
+name: researcher
+description: Gathers information, searches knowledge bases, identifies relevant sources
+capabilities:
+  - research
+  - information-gathering

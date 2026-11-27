@@ -1,0 +1,41 @@
+# agent-card.yaml — Agent Deployment Engineer
+# Self-describing metadata for agent discovery and registry.
+
+name: agent-deployment-engineer
+description: >
+  Conversational assistant that helps non-technical users design and deploy
+  agents on the Enterprise Agentic AI Platform (EAP). Guides users through use case
+  discovery, pattern recommendation, YAML manifest generation, code scaffolding,
+  and CI/CD deployment — all through natural language conversation.
+url: "https://{runtime_endpoint}"
+version: "1.0.0"
+capabilities:
+  streaming: true
+  pushNotifications: false
+skills:
+  - id: use-case-discovery
+    name: Use Case Discovery
+    description: >
+      Extracts problem domain, data sources, expected outputs, and interaction
+      model from natural language descriptions of agent use cases.
+  - id: pattern-recommendation
+    name: Pattern Recommendation
+    description: >
+      Analyzes requirements and recommends the best architecture pattern
+      (standalone, supervisor, sequential-workflow, router, or swarm) with
+      plain-language explanations.
+  - id: manifest-generation
+    name: Manifest Generation
+    description: >
+      Generates validated YAML manifests (agent.yaml, agent-card.yaml,
+      application.yaml) conforming to the platform schema.
+  - id: code-scaffolding
+    name: Code Scaffolding
+    description: >
+      Generates main.py and Dockerfile for each agent following platform
+      conventions and the Strands framework pattern.
+  - id: deployment
+    name: Deployment
+    description: >
+      Commits generated files to CodeCommit and triggers the CI/CD pipeline
+      to deploy agents to AgentCore Runtime.

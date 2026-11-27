@@ -1,0 +1,21 @@
+EAP Langfuse_Stack Module
+================================
+
+This module includes work derived from:
+
+  Agentic Value Accelerator (AVA)
+  https://github.com/aws-samples/sample-agentic-value-accelerator
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Licensed under the Apache License, Version 2.0.
+
+  A copy of the Apache License, Version 2.0 is available at:
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Derived parts: the self-hosted Langfuse observability pattern — ECS Fargate
+(Langfuse web + worker), Aurora PostgreSQL Serverless v2, ClickHouse, ElastiCache
+Redis, and a CloudFront + Application Load Balancer edge — together with the dual
+AWS-native + embedded-Langfuse observability approach.
+
+Modifications have been made to integrate with the Enterprise Agentic AI Platform
+(powered by Amazon Bedrock AgentCore). See ATTRIBUTION.md in this directory for
+details.

@@ -1,0 +1,26 @@
+# Template: Swarm Pattern
+# Peer agents collaborate iteratively via A2A handoffs.
+# No central orchestrator — each agent's LLM decides who to call next.
+# Orchestration: A2A mesh (platform wires peer discovery via env vars).
+# Step Functions is NOT used — flow is emergent, not predefined.
+
+name: <app-name>
+architecture: swarm
+description: <description>
+orchestration: a2a  # swarm always uses A2A mesh, not step-functions
+
+agents:
+  - name: <agent-a>
+    role: peer
+    can_call: [<agent-b>, <agent-c>]
+    description: <what this agent does>
+
+  - name: <agent-b>
+    role: peer
+    can_call: [<agent-a>, <agent-c>]
+    description: <what this agent does>
+
+  - name: <agent-c>
+    role: peer
+    can_call: [<agent-a>, <agent-b>]
+    description: <what this agent does>

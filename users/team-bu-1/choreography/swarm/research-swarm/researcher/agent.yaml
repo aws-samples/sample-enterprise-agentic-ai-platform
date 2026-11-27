@@ -1,0 +1,6 @@
+name: researcher
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a]
+role: peer
+can_call: [analyst, writer]

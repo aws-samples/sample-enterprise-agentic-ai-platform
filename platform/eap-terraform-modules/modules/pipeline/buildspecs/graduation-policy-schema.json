@@ -1,0 +1,174 @@
+{
+  "$id": "https://eap-platform.internal/schemas/graduation-policy/v1.0",
+  "title": "Graduation Policy",
+  "description": "Governance-owned graduation policy defining evaluation thresholds for agent promotion across environments. Owned by AI Governance / Platform Engineering.",
+  "type": "object",
+  "required": ["version", "platform_minimums", "environments"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version identifier",
+      "pattern": "^\\d+\\.\\d+$",
+      "examples": ["1.0"]
+    },
+    "platform_minimums": {
+      "type": "object",
+      "description": "Platform-enforced minimum thresholds that cannot be lowered by domain overrides",
+      "required": ["safety"],
+      "additionalProperties": false,
+      "properties": {
+        "safety": {
+          "type": "number",
+          "minimum": 0.90,
+          "maximum": 1.0,
+          "description": "Platform-enforced minimum safety threshold. Cannot be set below 0.90."
+        }
+      }
+    },
+    "environments": {
+      "type": "object",
+      "description": "Per-environment graduation thresholds and configuration",
+      "additionalProperties": false,
+      "properties": {
+        "dev": {
+          "$ref": "#/$defs/environment_config"
+        },
+        "qa": {
+          "$ref": "#/$defs/environment_config"
+        },
+        "uat": {
+          "$ref": "#/$defs/environment_config"
+        },
+        "prod": {
+          "$ref": "#/$defs/environment_config"
+        }
+      },
+      "minProperties": 1
+    },
+    "domain_overrides": {
+      "type": "object",
+      "description": "Per-domain threshold overrides. Can only be stricter (higher) than environment defaults.",
+      "additionalProperties": {
+        "$ref": "#/$defs/domain_override"
+      }
+    },
+    "custom_evaluators": {
+      "type": "object",
+      "description": "Domain-specific custom evaluators backed by Lambda functions",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/custom_evaluator"
+        },
+        "minItems": 1
+      }
+    }
+  },
+  "$defs": {
+    "threshold_value": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Evaluation threshold score between 0.0 and 1.0 inclusive"
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "Evaluation thresholds for built-in evaluators",
+      "properties": {
+        "safety": {
+          "$ref": "#/$defs/threshold_value"
+        },
+        "correctness": {
+          "$ref": "#/$defs/threshold_value"
+        },
+        "helpfulness": {
+          "$ref": "#/$defs/threshold_value"
+        },
+        "grounding": {
+          "$ref": "#/$defs/threshold_value"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "environment_config": {
+      "type": "object",
+      "description": "Configuration for a single environment",
+      "required": ["thresholds"],
+      "additionalProperties": false,
+      "properties": {
+        "thresholds": {
+          "$ref": "#/$defs/thresholds"
+        },
+        "red_team_required": {
+          "type": "boolean",
+          "description": "Whether red-team suite must pass for graduation",
+          "default": false
+        },
+        "red_team_max_failures": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum allowed red-team failures (0 = zero tolerance)"
+        },
+        "requires_qa_graduation_report": {
+          "type": "boolean",
+          "description": "Whether a passing QA graduation report is required before deployment to this environment",
+          "default": false
+        }
+      }
+    },
+    "domain_override": {
+      "type": "object",
+      "description": "Per-environment threshold overrides for a specific domain. Values can only be stricter (higher) than environment defaults.",
+      "additionalProperties": false,
+      "properties": {
+        "dev": {
+          "$ref": "#/$defs/domain_environment_override"
+        },
+        "qa": {
+          "$ref": "#/$defs/domain_environment_override"
+        },
+        "uat": {
+          "$ref": "#/$defs/domain_environment_override"
+        },
+        "prod": {
+          "$ref": "#/$defs/domain_environment_override"
+        }
+      },
+      "minProperties": 1
+    },
+    "domain_environment_override": {
+      "type": "object",
+      "description": "Threshold overrides for a domain in a specific environment",
+      "required": ["thresholds"],
+      "additionalProperties": false,
+      "properties": {
+        "thresholds": {
+          "$ref": "#/$defs/thresholds"
+        }
+      }
+    },
+    "custom_evaluator": {
+      "type": "object",
+      "description": "A custom Lambda-backed evaluator for domain-specific evaluation",
+      "required": ["name", "lambda_arn", "threshold"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique name for the custom evaluator",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "lambda_arn": {
+          "type": "string",
+          "description": "ARN of the Lambda function implementing the evaluator",
+          "pattern": "^arn:aws:lambda:[a-z0-9-]+:\\d{12}:function:[a-zA-Z0-9_-]+$"
+        },
+        "threshold": {
+          "$ref": "#/$defs/threshold_value"
+        }
+      }
+    }
+  }
+}

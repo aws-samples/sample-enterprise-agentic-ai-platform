@@ -1,0 +1,8 @@
+# KB Retriever — searches internal knowledge bases (Bedrock Knowledge Bases, OpenSearch, etc.)
+name: kb-retriever
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a]
+role: worker
+called_by: [orchestrator]
+kb : [ snowflake]

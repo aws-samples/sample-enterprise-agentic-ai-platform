@@ -1,0 +1,29 @@
+# Example Lambda targets (uncomment and customize)
+#
+# Lambda targets wrap compute-heavy tools that can't be a simple REST proxy.
+# Gateway invokes the Lambda directly via MCP JSON-RPC.
+#
+# --- Basic Lambda target ---
+#
+# name: my-tool
+# type: lambda
+# description: What this tool does
+# lambda_arn: arn:aws:lambda:us-east-1:123456789:function:my-tool
+# tool_schemas:
+#   - name: do_something
+#     description: What this tool operation does
+#
+# --- Lambda with API key auth to downstream ---
+#
+# name: my-tool-with-auth
+# type: lambda
+# description: Tool that calls an authenticated downstream API
+# lambda_arn: arn:aws:lambda:us-east-1:123456789:function:my-tool
+# credential_type: api_key
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:downstream-key
+#   credential_location: HEADER
+#   credential_parameter_name: x-api-key
+# tool_schemas:
+#   - name: query_data
+#     description: Query data from the downstream service

@@ -1,0 +1,31 @@
+# MCP Server Target Template
+# Owner: Shared Services Team
+#
+# Registers a remote MCP server with AgentCore Gateway.
+# MCP servers must have a hosted HTTP/HTTPS endpoint.
+# stdio-based servers must be deployed as REST APIs instead.
+
+# --- No auth (public endpoint) ---
+
+name: my-mcp-server
+type: mcp_server
+description: What this MCP server provides and which tools it exposes
+endpoint: https://my-mcp-server.example.com
+
+# --- With API key auth ---
+#
+# name: my-mcp-server
+# type: mcp_server
+# description: MCP server requiring API key
+# endpoint: https://my-mcp-server.example.com
+# credential_type: api_key
+# credential_config:
+#   # ARN of the Secrets Manager secret containing the API key
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:my-api-key
+#   # Where to inject the key: HEADER or QUERY_PARAMETER
+#   credential_location: HEADER
+#   # Header name or query parameter name
+#   credential_parameter_name: x-api-key
+
+# --- With OAuth 3LO (user-level entitlements) ---
+# See docs/templates/gateway/3lo-entitlements.yaml

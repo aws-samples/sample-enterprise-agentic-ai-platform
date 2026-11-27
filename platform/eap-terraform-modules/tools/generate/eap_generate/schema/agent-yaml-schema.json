@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eap.internal/schemas/agent-yaml/v1",
+  "title": "EAP Agent YAML Manifest",
+  "type": "object",
+  "required": ["domain", "framework", "model_id", "agents"],
+  "additionalProperties": false,
+  "properties": {
+    "domain": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,30}[a-z0-9]$",
+      "description": "EAP domain name (lowercase alphanumeric with hyphens)"
+    },
+    "framework": {
+      "type": "string",
+      "enum": ["strands", "langgraph", "crewai", "custom"],
+      "description": "Agent framework"
+    },
+    "model_id": {
+      "type": "string",
+      "description": "Bedrock foundation model ID"
+    },
+    "module_source": {
+      "type": "string",
+      "description": "Override for module source URL template"
+    },
+    "module_version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "default": "v1.0.0",
+      "description": "Module version tag (semver with v prefix)"
+    },
+    "agents": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/definitions/AgentBlock"
+      },
+      "description": "Map of agent name to agent configuration"
+    }
+  },
+  "definitions": {
+    "AgentBlock": {
+      "type": "object",
+      "required": ["protocols"],
+      "additionalProperties": false,
+      "properties": {
+        "protocols": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["a2a", "mcp", "agui", "http"]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "role": { "type": "string" },
+        "calls": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "allowed_callers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "memory": { "$ref": "#/definitions/MemoryConfig" },
+        "gateway_refs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GatewayRef" }
+        },
+        "evaluations": { "$ref": "#/definitions/EvaluationsConfig" },
+        "code_interpreter": { "$ref": "#/definitions/CodeInterpreterConfig" },
+        "browser": { "$ref": "#/definitions/BrowserConfig" }
+      }
+    },
+    "MemoryConfig": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["short-term", "long-term", "episodic"]
+        },
+        "retention": {
+          "type": "string",
+          "pattern": "^[0-9]+d$",
+          "default": "30d"
+        }
+      }
+    },
+    "EvaluationsConfig": {
+      "type": "object",
+      "required": ["evaluators"],
+      "additionalProperties": false,
+      "properties": {
+        "evaluators": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["correctness", "helpfulness", "safety", "goal_success_rate"]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "GatewayRef": {
+      "type": "object",
+      "required": ["mcp_servers"],
+      "additionalProperties": false,
+      "properties": {
+        "mcp_servers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+    "CodeInterpreterConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true }
+      }
+    },
+    "BrowserConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Summarizer Agent — Step 3 of A2A chain (terminal)
+# Produces a human-readable summary from enriched facts.
+# Called by enricher. No downstream calls.
+# Future: orchestration via Step Functions or EventBridge (workflow.yaml)
+
+name: summarizer
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+
+protocols: [a2a]
+role: worker
+allowed_callers: [enricher]

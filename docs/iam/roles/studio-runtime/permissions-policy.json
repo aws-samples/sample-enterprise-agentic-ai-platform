@@ -1,0 +1,112 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECRImageAccess",
+      "Effect": "Allow",
+      "Action": ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"],
+      "Resource": ["arn:<PARTITION>:ecr:<REGION>:<ACCOUNT_ID>:repository/*"]
+    },
+    {
+      "Sid": "ECRTokenAccess",
+      "Effect": "Allow",
+      "Action": ["ecr:GetAuthorizationToken"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LogsCreateGroup",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogStreams", "logs:CreateLogGroup"],
+      "Resource": ["arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/bedrock-agentcore/runtimes/*"]
+    },
+    {
+      "Sid": "LogsDescribeGroups",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogGroups"],
+      "Resource": ["arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:*"]
+    },
+    {
+      "Sid": "LogsWriteEvents",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": ["arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/bedrock-agentcore/runtimes/*:log-stream:*"]
+    },
+    {
+      "Sid": "XRayTracing",
+      "Effect": "Allow",
+      "Action": ["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "CloudWatchMetrics",
+      "Effect": "Allow",
+      "Action": ["cloudwatch:PutMetricData"],
+      "Resource": "*",
+      "Condition": { "StringEquals": { "cloudwatch:namespace": "bedrock-agentcore" } }
+    },
+    {
+      "Sid": "WorkloadIdentityTokens",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:GetWorkloadAccessToken",
+        "bedrock-agentcore:GetWorkloadAccessTokenForJWT",
+        "bedrock-agentcore:GetWorkloadAccessTokenForUserId"
+      ],
+      "Resource": [
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:workload-identity-directory/default",
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:workload-identity-directory/default/workload-identity/*"
+      ]
+    },
+    {
+      "Sid": "BedrockModelInvocation",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+      "Resource": [
+        "arn:<PARTITION>:bedrock:*::foundation-model/*",
+        "arn:<PARTITION>:bedrock:<REGION>:<ACCOUNT_ID>:*"
+      ]
+    },
+    {
+      "Sid": "AgentCoreMemory",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:CreateEvent",
+        "bedrock-agentcore:GetEvent",
+        "bedrock-agentcore:ListEvents",
+        "bedrock-agentcore:DeleteEvent",
+        "bedrock-agentcore:RetrieveMemoryRecords"
+      ],
+      "Resource": ["arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:memory/*"]
+    },
+    {
+      "Sid": "StudioDeployCodeCommit",
+      "Effect": "Allow",
+      "Action": [
+        "codecommit:GetBranch",
+        "codecommit:GetFolder",
+        "codecommit:GetFile",
+        "codecommit:GetRepository",
+        "codecommit:CreateCommit"
+      ],
+      "Resource": ["arn:<PARTITION>:codecommit:<REGION>:<ACCOUNT_ID>:<DEPLOY_REPO>"]
+    },
+    {
+      "Sid": "StudioDeployPipelineRead",
+      "Effect": "Allow",
+      "Action": ["codepipeline:ListPipelineExecutions", "codepipeline:GetPipelineExecution"],
+      "Resource": ["arn:<PARTITION>:codepipeline:<REGION>:<ACCOUNT_ID>:<DEPLOY_PIPELINE>"]
+    },
+    {
+      "Sid": "StudioResolveRuntimes",
+      "Effect": "Allow",
+      "Action": ["bedrock-agentcore:ListAgentRuntimes"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "OtelCollectorEndpointSsmRead",
+      "Effect": "Allow",
+      "Action": ["ssm:GetParameter"],
+      "Resource": ["arn:<PARTITION>:ssm:<REGION>:<ACCOUNT_ID>:parameter/eap/observability/collector-endpoint"]
+    }
+  ]
+}

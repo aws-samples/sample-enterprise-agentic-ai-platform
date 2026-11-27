@@ -1,0 +1,55 @@
+# agent.yaml — Agent Manifest Template
+# Owner: App Team
+#
+# Declares what AgentCore services the agent needs.
+# Platform reads this via yamldecode() and provisions everything.
+# App teams write YAML — platform owns all Terraform.
+
+# Agent name (must be unique within the domain)
+name: my-agent
+
+# Agent framework (strands, langgraph, crewai, custom)
+framework: strands
+
+# Bedrock model ID for LLM inference
+model_id: us.anthropic.claude-sonnet-5
+
+# Protocols the agent supports
+# a2a  — Agent-to-Agent (JSON-RPC on port 9000)
+# mcp  — Model Context Protocol (port 8000)
+# agui — Agent GUI (port 8080)
+# http — Plain HTTP (port 8080)
+protocols: [a2a, mcp]
+
+# Agent role in multi-agent patterns
+# standalone  — independent agent
+# supervisor  — delegates to other agents
+# specialist  — called by a supervisor
+# workflow    — part of a directed chain
+role: standalone
+
+# Memory configuration (optional)
+# Omit this block for stateless agents
+memory:
+  # short-term — session-scoped, cleared on session end
+  # long-term  — persisted across sessions
+  type: long-term
+  # Retention period (e.g., 30d, 90d, 365d)
+  retention: 90d
+
+# Gateway tool references (optional)
+# Names must match targets registered in eap-data-services
+gateway_refs:
+  - mcp_servers: [snowflake-warehouse, sharepoint-docs]
+
+# Evaluation configuration (optional)
+# Built-in evaluators: correctness, helpfulness, safety, goal_success_rate
+evaluations:
+  evaluators: [correctness, helpfulness, safety]
+  thresholds:
+    safety: 0.95
+
+# Agents this agent calls via A2A (optional, for supervisor/workflow patterns)
+# calls:
+#   - specialist-agent
+#   - enricher-agent

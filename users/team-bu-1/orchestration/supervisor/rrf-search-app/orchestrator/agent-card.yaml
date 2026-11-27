@@ -1,0 +1,6 @@
+name: orchestrator
+description: RRF search orchestrator — dispatches queries to knowledge base and web retrievers, fuses ranked results using Reciprocal Rank Fusion
+capabilities:
+  - multi-kb-search
+  - rrf-fusion
+  - query-dispatch

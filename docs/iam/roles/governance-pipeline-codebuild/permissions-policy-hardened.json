@@ -1,0 +1,47 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Artifacts",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:ListBucket"],
+      "Resource": ["<ARTIFACTS_BUCKET_ARN>", "<ARTIFACTS_BUCKET_ARN>/*"]
+    },
+    {
+      "Sid": "ReadPlatformState",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:<PARTITION>:s3:::<PLATFORM_STATE_BUCKET>",
+        "arn:<PARTITION>:s3:::<PLATFORM_STATE_BUCKET>/*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": ["arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/codebuild/<NAME>-*"]
+    },
+    {
+      "Sid": "AgentCore",
+      "Effect": "Allow",
+      "Action": ["bedrock-agentcore:CreatePolicy", "bedrock-agentcore:UpdatePolicy"],
+      "Resource": [
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:policy-engine/*",
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:policy-engine/*/policy/*"
+      ]
+    },
+    {
+      "Sid": "EcrAuth",
+      "Effect": "Allow",
+      "Action": ["ecr:GetAuthorizationToken"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "EcrImage",
+      "Effect": "Allow",
+      "Action": ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"],
+      "Resource": ["arn:<PARTITION>:ecr:<REGION>:<ACCOUNT_ID>:repository/eap-*"]
+    }
+  ]
+}

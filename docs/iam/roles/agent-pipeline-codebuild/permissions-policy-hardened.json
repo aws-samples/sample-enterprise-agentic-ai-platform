@@ -1,0 +1,228 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": ["arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/codebuild/<DOMAIN>-<NAME>-*"]
+    },
+    {
+      "Sid": "Artifacts",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:ListBucket"],
+      "Resource": ["<ARTIFACTS_BUCKET_ARN>", "<ARTIFACTS_BUCKET_ARN>/*"]
+    },
+    {
+      "Sid": "EcrAuth",
+      "Effect": "Allow",
+      "Action": ["ecr:GetAuthorizationToken"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "EcrPushPull",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ecr:PutImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload"
+      ],
+      "Resource": ["arn:<PARTITION>:ecr:<REGION>:<ACCOUNT_ID>:repository/eap-*"]
+    },
+    {
+      "Sid": "Cognito",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:CreateUserPoolClient",
+        "cognito-idp:UpdateUserPoolClient",
+        "cognito-idp:DeleteUserPoolClient",
+        "cognito-idp:DescribeUserPoolClient",
+        "cognito-idp:AdminCreateUser",
+        "cognito-idp:AdminDeleteUser",
+        "cognito-idp:AdminGetUser",
+        "cognito-idp:AdminUpdateUserAttributes",
+        "cognito-idp:AdminDeleteUserAttributes",
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:AdminRemoveUserFromGroup",
+        "cognito-idp:AdminListGroupsForUser"
+      ],
+      "Resource": ["arn:<PARTITION>:cognito-idp:<REGION>:<ACCOUNT_ID>:userpool/<COGNITO_USER_POOL_ID>"]
+    },
+    {
+      "Sid": "IamDomainRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PassRole",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListInstanceProfilesForRole"
+      ],
+      "Resource": [
+        "arn:<PARTITION>:iam::<ACCOUNT_ID>:role/<DOMAIN>-*",
+        "arn:<PARTITION>:iam::<ACCOUNT_ID>:role/<DOMAIN_UNDERSCORED>_*"
+      ]
+    },
+    {
+      "Sid": "IamServiceLinkedRole",
+      "Effect": "Allow",
+      "Action": ["iam:CreateServiceLinkedRole"],
+      "Resource": ["arn:<PARTITION>:iam::<ACCOUNT_ID>:role/aws-service-role/*"]
+    },
+    {
+      "Sid": "StepFunctionsStateMachines",
+      "Effect": "Allow",
+      "Action": [
+        "states:CreateStateMachine",
+        "states:DescribeStateMachine",
+        "states:UpdateStateMachine",
+        "states:DeleteStateMachine",
+        "states:ListStateMachineVersions",
+        "states:TagResource",
+        "states:UntagResource",
+        "states:ListTagsForResource"
+      ],
+      "Resource": ["arn:<PARTITION>:states:<REGION>:<ACCOUNT_ID>:stateMachine:<DOMAIN_UNDERSCORED>_*"]
+    },
+    {
+      "Sid": "StepFunctionsLogGroups",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:DeleteLogGroup",
+        "logs:PutRetentionPolicy",
+        "logs:TagResource",
+        "logs:ListTagsForResource",
+        "logs:ListTagsLogGroup",
+        "logs:TagLogGroup",
+        "logs:UntagLogGroup"
+      ],
+      "Resource": [
+        "arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/states/*",
+        "arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/states/*:*"
+      ]
+    },
+    {
+      "Sid": "LogsDescribeGroups",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogGroups"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "AgentCoreCreateRequiresWildcard",
+      "Effect": "Allow",
+      "Action": ["bedrock-agentcore:CreateAgentRuntime", "bedrock-agentcore:CreateMemory"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "AgentCoreRuntimesAndMemory",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:GetAgentRuntime",
+        "bedrock-agentcore:UpdateAgentRuntime",
+        "bedrock-agentcore:DeleteAgentRuntime",
+        "bedrock-agentcore:CreateAgentRuntimeEndpoint",
+        "bedrock-agentcore:GetAgentRuntimeEndpoint",
+        "bedrock-agentcore:UpdateAgentRuntimeEndpoint",
+        "bedrock-agentcore:DeleteAgentRuntimeEndpoint",
+        "bedrock-agentcore:GetMemory",
+        "bedrock-agentcore:UpdateMemory",
+        "bedrock-agentcore:DeleteMemory",
+        "bedrock-agentcore:TagResource",
+        "bedrock-agentcore:UntagResource",
+        "bedrock-agentcore:ListTagsForResource"
+      ],
+      "Resource": [
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:runtime/*",
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:memory/*"
+      ]
+    },
+    {
+      "Sid": "AgentCoreRuntimeWorkloadIdentity",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:CreateWorkloadIdentity",
+        "bedrock-agentcore:GetWorkloadIdentity",
+        "bedrock-agentcore:DeleteWorkloadIdentity"
+      ],
+      "Resource": [
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:workload-identity-directory/default",
+        "arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:workload-identity-directory/default/workload-identity/*"
+      ]
+    },
+    {
+      "Sid": "LambdaInvokeBridge",
+      "Effect": "Allow",
+      "Action": ["lambda:*"],
+      "Resource": ["arn:<PARTITION>:lambda:<REGION>:<ACCOUNT_ID>:function:<DOMAIN>-*"]
+    },
+    {
+      "Sid": "SsmEvalConfig",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:DeleteParameter",
+        "ssm:GetParametersByPath",
+        "ssm:AddTagsToResource",
+        "ssm:RemoveTagsFromResource",
+        "ssm:ListTagsForResource"
+      ],
+      "Resource": ["arn:<PARTITION>:ssm:<REGION>:<ACCOUNT_ID>:parameter/eap/<DOMAIN>/*"]
+    },
+    {
+      "Sid": "SsmDescribe",
+      "Effect": "Allow",
+      "Action": ["ssm:DescribeParameters"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "EvalScheduleRules",
+      "Effect": "Allow",
+      "Action": [
+        "events:PutRule",
+        "events:DeleteRule",
+        "events:DescribeRule",
+        "events:PutTargets",
+        "events:RemoveTargets",
+        "events:ListTagsForResource",
+        "events:TagResource",
+        "events:UntagResource"
+      ],
+      "Resource": ["arn:<PARTITION>:events:<REGION>:<ACCOUNT_ID>:rule/eap-eval-*"]
+    },
+    {
+      "Sid": "LifecycleStore",
+      "Effect": "Allow",
+      "Action": ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:Query"],
+      "Resource": [
+        "arn:<PARTITION>:dynamodb:<REGION>:<ACCOUNT_ID>:table/<LIFECYCLE_TABLE>",
+        "arn:<PARTITION>:dynamodb:<REGION>:<ACCOUNT_ID>:table/<LIFECYCLE_TABLE>/index/*"
+      ]
+    },
+    {
+      "Sid": "CodeCommitSource",
+      "Effect": "Allow",
+      "Action": [
+        "codecommit:GetBranch",
+        "codecommit:GetCommit",
+        "codecommit:UploadArchive",
+        "codecommit:GetUploadArchiveStatus",
+        "codecommit:CancelUploadArchive"
+      ],
+      "Resource": ["arn:<PARTITION>:codecommit:<REGION>:<ACCOUNT_ID>:<REPOSITORY_NAME>"]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["dynamodb:Query", "dynamodb:GetItem", "dynamodb:Scan"],
+      "Resource": [
+        "arn:<PARTITION>:dynamodb:<REGION>:<ACCOUNT_ID>:table/agent-school-lifecycle-*",
+        "arn:<PARTITION>:dynamodb:<REGION>:<ACCOUNT_ID>:table/agent-school-lifecycle-*/index/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject"],
+      "Resource": "arn:<PARTITION>:s3:::eap-graduation-reports-*/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["codepipeline:ListPipelines"],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "codepipeline:GetPipelineExecution",
+        "codepipeline:ListPipelineExecutions",
+        "codepipeline:StartPipelineExecution"
+      ],
+      "Resource": "arn:<PARTITION>:codepipeline:<REGION>:<ACCOUNT_ID>:*"
+    }
+  ]
+}

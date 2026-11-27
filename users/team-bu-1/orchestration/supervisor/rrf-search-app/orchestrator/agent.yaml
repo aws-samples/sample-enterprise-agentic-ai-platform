@@ -1,0 +1,11 @@
+# RRF Orchestrator — dispatches queries and fuses results
+# Dispatch phase: sends user query to all retrievers
+# Aggregation phase: applies RRF scoring across retriever results
+#   score(doc) = Σ 1/(k + rank_i) where k=60 (standard RRF constant)
+
+name: orchestrator
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a]
+role: orchestrator
+calls: [kb-retriever, web-retriever]

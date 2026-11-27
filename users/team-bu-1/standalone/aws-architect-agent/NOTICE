@@ -1,0 +1,9 @@
+This project includes code from:
+
+  sample-genai-aws-solutions-architect-agent
+  https://github.com/aws-samples/sample-genai-aws-solutions-architect-agent
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Licensed under the MIT License (see LICENSE file).
+
+Modifications have been made to integrate with the Enterprise Agentic AI Platform
+(powered by Amazon Bedrock AgentCore).

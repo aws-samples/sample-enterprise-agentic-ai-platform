@@ -1,0 +1,8 @@
+# MCP Server Target — AWS Knowledge
+# Type: Remote MCP (hosted endpoint)
+# Provides: search_documentation, read_documentation, recommend, get_regional_availability
+
+name: aws-knowledge
+type: mcp_server
+description: AWS documentation search, recommendations, and regional availability
+endpoint: https://knowledge-mcp.global.api.aws

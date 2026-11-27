@@ -1,0 +1,30 @@
+Enterprise Agentic AI Platform (EAP)
+===========================================
+
+This repository includes third-party and derived works. Attributions for such
+works are listed below. Where a component maintains its own NOTICE/ATTRIBUTION
+file, that file is authoritative for the component.
+
+--------------------------------------------------------------------------------
+
+Agentic Value Accelerator (AVA)
+  https://github.com/aws-samples/sample-agentic-value-accelerator
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Licensed under the Apache License, Version 2.0
+  (https://www.apache.org/licenses/LICENSE-2.0).
+
+  Used by: platform/eap-terraform-modules/modules/observability/langfuse
+  Derived: the self-hosted Langfuse observability pattern (ECS Fargate web+worker,
+  Aurora PostgreSQL Serverless v2, ClickHouse, ElastiCache Redis, CloudFront +
+  ALB edge) and the dual AWS-native + embedded-Langfuse observability approach.
+  See the module's ATTRIBUTION.md, NOTICE and LICENSE for details.
+
+--------------------------------------------------------------------------------
+
+sample-genai-aws-solutions-architect-agent
+  https://github.com/aws-samples/sample-genai-aws-solutions-architect-agent
+  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  Licensed under the MIT No Attribution License (MIT-0).
+
+  Used by: users/team-bu-1/standalone/aws-architect-agent
+  See that component's NOTICE for details.

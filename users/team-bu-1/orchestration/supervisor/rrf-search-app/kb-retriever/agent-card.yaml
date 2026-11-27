@@ -1,0 +1,5 @@
+name: kb-retriever
+description: Searches internal knowledge bases and returns ranked results
+capabilities:
+  - knowledge-base-search
+  - semantic-retrieval

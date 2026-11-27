@@ -1,0 +1,54 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CodePipelineRead",
+      "Effect": "Allow",
+      "Action": [
+        "codepipeline:GetPipelineExecution",
+        "codepipeline:GetPipelineState",
+        "codepipeline:ListPipelineExecutions"
+      ],
+      "Resource": "arn:<PARTITION>:codepipeline:<REGION>:<ACCOUNT_ID>:<DEPLOY_PIPELINE>"
+    },
+    {
+      "Sid": "AgentCoreListRuntimes",
+      "Effect": "Allow",
+      "Action": ["bedrock-agentcore:ListAgentRuntimes"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CodeCommitRead",
+      "Effect": "Allow",
+      "Action": ["codecommit:GetFolder", "codecommit:GetFile"],
+      "Resource": "arn:<PARTITION>:codecommit:<REGION>:<ACCOUNT_ID>:<TARGET_REPO>"
+    },
+    {
+      "Sid": "LifecycleStoreRead",
+      "Effect": "Allow",
+      "Action": ["dynamodb:Scan", "dynamodb:Query", "dynamodb:GetItem"],
+      "Resource": [
+        "arn:<PARTITION>:dynamodb:<REGION>:<ACCOUNT_ID>:table/<LIFECYCLE_TABLE>",
+        "arn:<PARTITION>:dynamodb:<REGION>:<ACCOUNT_ID>:table/<LIFECYCLE_TABLE>/index/*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": "arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/lambda/studio-read-<ENVIRONMENT>:*"
+    },
+    {
+      "Sid": "LambdaVpcEni",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface",
+        "ec2:AssignPrivateIpAddresses",
+        "ec2:UnassignPrivateIpAddresses"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

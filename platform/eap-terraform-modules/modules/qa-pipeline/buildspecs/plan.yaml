@@ -1,0 +1,42 @@
+# QA Pipeline — Plan buildspec
+# Runs terraform init && terraform plan on the qa-deploy template.
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - pip install pyyaml --quiet 2>/dev/null || true
+      # Managed image (amazonlinux2-x86_64-standard:4.0) ships aws-cli v2 + python3;
+      # install the pinned Terraform here (was baked into the old custom image).
+      - TERRAFORM_VERSION=1.5.7
+      - curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o /tmp/terraform.zip
+      - unzip -o /tmp/terraform.zip -d /usr/local/bin
+      - terraform version
+  pre_build:
+    commands:
+      - echo "=== Setting up QA deploy workspace ==="
+      - export COMMIT_SHA=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - export TF_VAR_commit_sha=$COMMIT_SHA
+      - |
+        # Copy the qa-deploy template from S3
+        mkdir -p /tmp/qa-deploy
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/qa-deploy-template/ /tmp/qa-deploy/ --recursive
+      - |
+        # Copy source content into the deploy template directory
+        cp evaluation.yaml /tmp/qa-deploy/evaluation.yaml
+        cp -r evaluations/ /tmp/qa-deploy/evaluations/ 2>/dev/null || true
+        cp -r red-team/ /tmp/qa-deploy/red-team/ 2>/dev/null || true
+  build:
+    commands:
+      - echo "=== Terraform Plan ==="
+      - cd /tmp/qa-deploy
+      - |
+        terraform init \
+          -backend-config="bucket=$TF_VAR_platform_state_bucket" \
+          -backend-config="key=qa-pipeline/${TF_VAR_domain}/terraform.tfstate" \
+          -backend-config="region=$TF_VAR_aws_region"
+      - terraform plan -out=tfplan -input=false
+      - echo "=== Plan complete ==="
+artifacts:
+  files:
+    - '**/*'

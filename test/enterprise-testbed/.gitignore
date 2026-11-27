@@ -1,0 +1,6 @@
+# Local Terraform state + plans for the test-bed fixtures (per-account, ephemeral).
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/tfplan

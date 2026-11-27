@@ -1,0 +1,75 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ArtifactsBucket",
+      "Effect": "Allow",
+      "Action": ["s3:*"],
+      "Resource": ["<ARTIFACTS_BUCKET_ARN>", "<ARTIFACTS_BUCKET_ARN>/*"]
+    },
+    {
+      "Sid": "GroundTruthBucket",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket", "s3:DeleteObject"],
+      "Resource": [
+        "arn:<PARTITION>:s3:::<GROUND_TRUTH_BUCKET>",
+        "arn:<PARTITION>:s3:::<GROUND_TRUTH_BUCKET>/*"
+      ]
+    },
+    {
+      "Sid": "ReadPlatformState",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:<PARTITION>:s3:::<PLATFORM_STATE_BUCKET>",
+        "arn:<PARTITION>:s3:::<PLATFORM_STATE_BUCKET>/*"
+      ]
+    },
+    {
+      "Sid": "DynamoDBStateStore",
+      "Effect": "Allow",
+      "Action": ["dynamodb:PutItem", "dynamodb:GetItem", "dynamodb:DeleteItem", "dynamodb:Query", "dynamodb:Scan"],
+      "Resource": ["arn:<PARTITION>:dynamodb:<REGION>:<ACCOUNT_ID>:table/<PLATFORM_STATE_TABLE>"]
+    },
+    {
+      "Sid": "AgentCoreEvaluatorCreateRequiresWildcard",
+      "Effect": "Allow",
+      "Action": ["bedrock-agentcore:CreateEvaluator"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "AgentCoreEvaluators",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:GetEvaluator",
+        "bedrock-agentcore:UpdateEvaluator",
+        "bedrock-agentcore:DeleteEvaluator",
+        "bedrock-agentcore:TagResource",
+        "bedrock-agentcore:UntagResource",
+        "bedrock-agentcore:ListTagsForResource"
+      ],
+      "Resource": ["arn:<PARTITION>:bedrock-agentcore:<REGION>:<ACCOUNT_ID>:evaluator/*"]
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": [
+        "arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/codebuild/<NAME>-*",
+        "arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/codebuild/<NAME>-*:log-stream:*"
+      ]
+    },
+    {
+      "Sid": "ECRPull",
+      "Effect": "Allow",
+      "Action": ["ecr:GetAuthorizationToken"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "ECRImage",
+      "Effect": "Allow",
+      "Action": ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"],
+      "Resource": ["*"]
+    }
+  ]
+}

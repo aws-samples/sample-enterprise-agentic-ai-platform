@@ -1,0 +1,58 @@
+# QA Pipeline — Apply buildspec
+# Runs terraform apply, then register_qa_evaluators.py to update state store.
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - pip install pyyaml boto3 --quiet 2>/dev/null || true
+      # Managed image (amazonlinux2-x86_64-standard:4.0) ships aws-cli v2 + python3;
+      # install the pinned Terraform here (was baked into the old custom image).
+      - TERRAFORM_VERSION=1.5.7
+      - curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o /tmp/terraform.zip
+      - unzip -o /tmp/terraform.zip -d /usr/local/bin
+      - terraform version
+  pre_build:
+    commands:
+      - echo "=== Setting up QA deploy workspace ==="
+      - export COMMIT_SHA=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - export TF_VAR_commit_sha=$COMMIT_SHA
+      - |
+        # Copy the qa-deploy template from S3
+        mkdir -p /tmp/qa-deploy
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/qa-deploy-template/ /tmp/qa-deploy/ --recursive
+      - |
+        # Copy source content into the deploy template directory
+        cp evaluation.yaml /tmp/qa-deploy/evaluation.yaml
+        cp -r evaluations/ /tmp/qa-deploy/evaluations/ 2>/dev/null || true
+        cp -r red-team/ /tmp/qa-deploy/red-team/ 2>/dev/null || true
+      - |
+        # Download registration script from S3
+        aws s3 cp s3://$ARTIFACTS_BUCKET/_platform/scripts/register_qa_evaluators.py /tmp/register_qa_evaluators.py
+  build:
+    commands:
+      - echo "=== Terraform Apply ==="
+      - cd /tmp/qa-deploy
+      - |
+        terraform init \
+          -backend-config="bucket=$TF_VAR_platform_state_bucket" \
+          -backend-config="key=qa-pipeline/${TF_VAR_domain}/terraform.tfstate" \
+          -backend-config="region=$TF_VAR_aws_region"
+      - terraform apply -auto-approve -input=false
+      - echo "=== Terraform apply complete ==="
+  post_build:
+    commands:
+      - echo "=== Registering evaluators in Platform State Store ==="
+      - cd /tmp/qa-deploy
+      - |
+        python3 /tmp/register_qa_evaluators.py \
+          --table "$PLATFORM_STATE_TABLE" \
+          --domain "$DOMAIN" \
+          --repo "$REPOSITORY_NAME" \
+          --commit-sha "$COMMIT_SHA" \
+          --ground-truth-bucket "$GROUND_TRUTH_BUCKET" \
+          --region "$TF_VAR_aws_region"
+      - echo "=== Registration complete ==="
+artifacts:
+  files:
+    - '**/*'

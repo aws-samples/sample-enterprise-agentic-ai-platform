@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudWatchMetricRead",
+      "Effect": "Allow",
+      "Action": ["cloudwatch:GetMetricData"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogsInsightsQuery",
+      "Effect": "Allow",
+      "Action": ["logs:StartQuery", "logs:GetQueryResults"],
+      "Resource": "arn:<PARTITION>:logs:<REGION>:<ACCOUNT_ID>:log-group:*"
+    },
+    {
+      "Sid": "CloudWatchLogsInsightsStopQuery",
+      "Effect": "Allow",
+      "Action": ["logs:StopQuery"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "XRayTraceRead",
+      "Effect": "Allow",
+      "Action": ["xray:GetTraceSummaries", "xray:BatchGetTraces"],
+      "Resource": "*"
+    }
+  ]
+}

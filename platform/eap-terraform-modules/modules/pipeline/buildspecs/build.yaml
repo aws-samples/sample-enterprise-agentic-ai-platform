@@ -1,0 +1,116 @@
+version: 0.2
+env:
+  exported-variables:
+    - APP_VERSION
+    - COMMIT_SHA
+phases:
+  pre_build:
+    commands:
+      - echo "=== ECR Login ==="
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo "ECR repo  = $ECR_REPO_URL"
+      - echo "Base image = $BASE_IMAGE_ECR_URL"
+      - docker pull $BASE_IMAGE_ECR_URL:latest || true
+      - echo "=== Version Computation ==="
+      - COMMIT_SHA=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo "Commit SHA = $COMMIT_SHA"
+      - |
+        # Derive APP_PATH from the source directory structure
+        # APP_PATH is expected as an env var from the pipeline module; fall back to auto-detection
+        if [ -z "$APP_PATH" ]; then
+          # Auto-detect: find application.yaml or agent.yaml to infer the app path
+          APP_YAML=$(find . -name "application.yaml" -not -path "./_deploy/*" 2>/dev/null | head -1)
+          if [ -n "$APP_YAML" ]; then
+            APP_PATH=$(dirname "$APP_YAML" | sed 's|^\./||')
+          else
+            AGENT_YAML=$(find . -name "agent.yaml" -not -path "./_deploy/*" 2>/dev/null | head -1)
+            if [ -n "$AGENT_YAML" ]; then
+              APP_PATH=$(dirname "$AGENT_YAML" | sed 's|^\./||')
+            else
+              echo "ERROR: Cannot determine APP_PATH. No application.yaml or agent.yaml found."
+              exit 1
+            fi
+          fi
+          echo "Auto-detected APP_PATH = $APP_PATH"
+        fi
+      - |
+        # -----------------------------------------------------------------
+        # Semantic versioning is TEMPORARILY DISABLED.
+        # The compute_version.py path requires a git working copy + push access
+        # (git tag/log/push), which the CodePipeline zip-archive source does not
+        # provide. Until the full git-clone-based versioning is wired, fall back
+        # to the pre-feature commit-SHA identifier so image tags stay unique and
+        # downstream stages still receive an APP_VERSION value.
+        # -----------------------------------------------------------------
+        APP_VERSION="sha-${COMMIT_SHA:0:12}"
+        echo "APP_VERSION = $APP_VERSION (semver disabled — commit-SHA fallback)"
+      - echo "Image tag (version) = $APP_VERSION"
+  build:
+    commands:
+      - echo "=== Content-driven agent discovery ==="
+      - |
+        IMAGE_TAGS=""
+        for APP_YAML in $(find . -name "application.yaml" -not -path "./_deploy/*" 2>/dev/null); do
+          APP_DIR=$(dirname "$APP_YAML")
+          APP_NAME=$(basename "$APP_DIR")
+          echo "Found multi-agent app: $APP_NAME at $APP_DIR"
+          for SUB_DIR in $APP_DIR/*/; do
+            [ -d "$SUB_DIR" ] || continue
+            SUB_NAME=$(basename "$SUB_DIR")
+            if [ -f "$SUB_DIR/Dockerfile" ]; then
+              echo "  Building agent: $APP_NAME/$SUB_NAME..."
+              VERSION_TAG="${APP_NAME}_${SUB_NAME}_${APP_VERSION}"
+              LATEST_TAG="${APP_NAME}-${SUB_NAME}-latest"
+              docker build --platform linux/arm64 \
+                --build-arg BASE_IMAGE_URI=$BASE_IMAGE_ECR_URL:latest \
+                -t $ECR_REPO_URL:$VERSION_TAG \
+                -f $SUB_DIR/Dockerfile "$SUB_DIR"
+              docker tag $ECR_REPO_URL:$VERSION_TAG $ECR_REPO_URL:$LATEST_TAG
+              docker push $ECR_REPO_URL:$VERSION_TAG
+              docker push $ECR_REPO_URL:$LATEST_TAG
+              SAFE_NAME=$(echo "${APP_NAME}_${SUB_NAME}" | tr '-' '_')
+              IMAGE_TAGS="$IMAGE_TAGS \"${SAFE_NAME}_image_tag\": \"$VERSION_TAG\","
+            fi
+          done
+        done
+        for AGENT_YAML in $(find . -name "agent.yaml" -not -path "./_deploy/*" 2>/dev/null); do
+          AGENT_DIR=$(dirname "$AGENT_YAML")
+          PARENT_DIR=$(dirname "$AGENT_DIR")
+          if [ -f "$PARENT_DIR/application.yaml" ]; then continue; fi
+          if [ -f "$AGENT_DIR/application.yaml" ]; then continue; fi
+          AGENT_NAME=$(basename "$AGENT_DIR")
+          if [ -f "$AGENT_DIR/Dockerfile" ]; then
+            echo "Building standalone: $AGENT_NAME..."
+            VERSION_TAG="${AGENT_NAME}_${APP_VERSION}"
+            LATEST_TAG="${AGENT_NAME}-latest"
+            docker build --platform linux/arm64 \
+              --build-arg BASE_IMAGE_URI=$BASE_IMAGE_ECR_URL:latest \
+              -t $ECR_REPO_URL:$VERSION_TAG \
+              -f $AGENT_DIR/Dockerfile "$AGENT_DIR"
+            docker tag $ECR_REPO_URL:$VERSION_TAG $ECR_REPO_URL:$LATEST_TAG
+            docker push $ECR_REPO_URL:$VERSION_TAG
+            docker push $ECR_REPO_URL:$LATEST_TAG
+            SAFE_NAME=$(echo "$AGENT_NAME" | tr '-' '_')
+            IMAGE_TAGS="$IMAGE_TAGS \"${SAFE_NAME}_image_tag\": \"$VERSION_TAG\","
+          fi
+        done
+  post_build:
+    commands:
+      - echo "=== Generating image_uri.json ==="
+      - |
+        IMAGE_TAGS=$(echo "$IMAGE_TAGS" | sed 's/,$//')
+        echo "{ \"app_version\": \"$APP_VERSION\", \"commit_sha\": \"$COMMIT_SHA\", \"images\": { $IMAGE_TAGS } }" | python3 -m json.tool > image_uri.json
+        cat image_uri.json
+      - echo "=== Writing VERSION file ==="
+      - echo "$APP_VERSION" > VERSION
+      - cat VERSION
+      - echo "=== Git tag creation skipped (semver disabled) ==="
+      - echo "=== Build complete ==="
+artifacts:
+  files:
+    - image_uri.json
+    - VERSION
+    - '**/agent.yaml'
+    - '**/agent-card.yaml'
+    - '**/application.yaml'
+    - '**/Dockerfile'

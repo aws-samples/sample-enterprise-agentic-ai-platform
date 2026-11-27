@@ -1,0 +1,13 @@
+# Enricher Agent — Step 2 of A2A chain
+# Enriches extracted facts with context and classification.
+# Called by extractor, calls summarizer via A2A.
+# Future: orchestration via Step Functions or EventBridge (workflow.yaml)
+
+name: enricher
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+
+protocols: [a2a]
+role: worker
+allowed_callers: [extractor]
+calls: [summarizer]

@@ -1,0 +1,15 @@
+# NOT YET SUPPORTED: the Terraform provider only supports protocol_type="MCP"
+#
+# The AWS Price List API is a REST API, not an MCP server.
+# Gateway supports REST/OpenAPI targets natively, but the Terraform provider
+# doesn't expose this target type yet.
+#
+# Options once REST/OpenAPI targets are supported:
+#   1. Register as OpenAPI target with inline spec
+#   2. Register as API Gateway REST API stage target
+#
+# name: aws-pricing
+# type: rest_api
+# description: AWS pricing data via Price List API
+# endpoint: https://api.pricing.us-east-1.amazonaws.com
+# credential_type: gateway_iam_role

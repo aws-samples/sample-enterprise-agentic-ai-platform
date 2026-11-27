@@ -1,0 +1,32 @@
+# agent-card.yaml — Agent Card Template
+# Owner: App Team
+#
+# Self-describing metadata for agent discovery.
+# Used by the Agent Registry for semantic search and by
+# other agents to discover capabilities at runtime.
+
+# Agent name (must match agent.yaml name)
+name: my-agent
+
+# Human-readable description of what this agent does
+description: >
+  Describe the agent's purpose, what data it accesses,
+  and what problems it solves for users.
+
+# Runtime endpoint (populated by platform at deploy time)
+url: "https://{runtime_endpoint}"
+
+# Semantic version
+version: "1.0.0"
+
+# Protocol capabilities
+capabilities:
+  streaming: true
+  pushNotifications: false
+
+# Skills — what this agent can do
+# Used for semantic search in the Agent Registry
+skills:
+  - id: skill-id
+    name: Skill Name
+    description: What this skill does and when to use it

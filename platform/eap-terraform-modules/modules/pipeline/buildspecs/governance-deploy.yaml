@@ -1,0 +1,39 @@
+# governance-deploy.yaml — Governance Pipeline Buildspec
+# Triggered on push to governance repo.
+# Validates graduation-policy.yaml against schema, then uploads to S3.
+# If validation fails, upload is skipped and pipeline fails.
+
+version: 0.2
+
+env:
+  variables:
+    GOVERNANCE_BUCKET: ""  # Set by pipeline environment variable
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install pyyaml --quiet
+
+  pre_build:
+    commands:
+      - echo "=== Governance Policy Validation ==="
+      - echo "Validating graduation-policy.yaml..."
+      - python3 scripts/validate_graduation_policy.py graduation-policy.yaml
+      - echo "Validation passed ✓"
+
+  build:
+    commands:
+      - echo "=== Uploading to S3 ==="
+      - echo "Bucket: ${GOVERNANCE_BUCKET}"
+      - aws s3 cp graduation-policy.yaml "s3://${GOVERNANCE_BUCKET}/graduation-policy.yaml"
+      - echo "Upload complete — policy is live immediately"
+      - echo ""
+      - echo "=== Version Info ==="
+      - aws s3api head-object --bucket "${GOVERNANCE_BUCKET}" --key "graduation-policy.yaml" --query "VersionId" --output text
+
+  post_build:
+    commands:
+      - echo "Governance policy deployed successfully"
+      - echo "Next agent pipeline execution will use the updated policy"

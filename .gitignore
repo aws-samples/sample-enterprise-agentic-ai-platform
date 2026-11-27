@@ -1,0 +1,42 @@
+
+# macOS
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+
+# Python build / test caches (regenerated; should not be tracked)
+*.egg-info/
+.hypothesis/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+platform/eap-platform/terraform.tfstate
+platform/eap-platform/terraform.tfstate.backup
+
+# Terraform archive_file build artifacts (regenerated at plan time from tracked
+# source; non-deterministic bytes, should not be tracked). Scoped to the known
+# archive_file output paths so the intentionally-tracked npm dist/*.zip bundles
+# are unaffected.
+platform/eap-terraform-modules/modules/pipeline/commit-validation/lambda_package.zip
+platform/eap-terraform-modules/modules/orchestration/lambda/invoke_bridge.zip
+**/.build/
+
+# Sample accelerator (external submodule, not part of this repo)
+sample-accelerator/
+# Test user / demo credentials - do not commit
+**/testuser-credentials.txt
+**/testuserpwd
+plan.txt
+# Console credentials - do not commit
+platform/console/LOGIN.md
+
+# Threat-modeling MCP working files (published copy lives in docs/security/)
+.threatmodel/

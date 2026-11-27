@@ -1,0 +1,60 @@
+# ⚠️  FUTURE — NOT YET BUILT
+#
+# User-Level Data Entitlements via 3LO (Three-Legged OAuth)
+#
+# This pattern uses AgentCore Identity Token Vault to acquire per-user
+# tokens for external data sources. The target sees the user's identity,
+# not the agent's — enabling row-level security and data entitlements.
+#
+# Prerequisites (to be built):
+#   1. Consent UI — redirects user to resource's OAuth login
+#   2. Token Vault registration — register each resource as OAuth provider
+#   3. Resource OAuth config — Snowflake/SharePoint configured as OAuth resource servers
+#
+# Why 3LO over header propagation:
+#   - Cryptographic proof of user identity (not a spoofable header)
+#   - Scoped access (read vs write, specific datasets)
+#   - User consent is explicit and auditable
+#   - Token refresh handled automatically by Token Vault
+#
+# --- Snowflake (user-level row security) ---
+#
+# name: snowflake-warehouse
+# type: rest_api
+# description: Enterprise Snowflake — user-level data entitlements via 3LO
+# api_gateway:
+#   api_id: <snowflake-proxy-api-id>
+#   stage: prod
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789012:secret:snowflake-oauth
+#   scopes: [session:role:analyst, refresh_token]
+#   grant_type: authorization_code
+#
+# --- SharePoint (document-level access) ---
+#
+# name: sharepoint-docs
+# type: rest_api
+# description: SharePoint document access — user-level permissions via 3LO
+# api_gateway:
+#   api_id: <sharepoint-proxy-api-id>
+#   stage: prod
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789012:secret:sharepoint-oauth
+#   scopes: [Files.Read, Sites.Read.All]
+#   grant_type: authorization_code
+#
+# --- Internal CRM (customer data entitlements) ---
+#
+# name: internal-crm
+# type: rest_api
+# description: Internal CRM — user-scoped customer data via 3LO
+# api_gateway:
+#   api_id: <crm-api-id>
+#   stage: prod
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789012:secret:crm-oauth
+#   scopes: [customers.read, accounts.read]
+#   grant_type: authorization_code

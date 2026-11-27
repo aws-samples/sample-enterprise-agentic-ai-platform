@@ -1,0 +1,6 @@
+name: analyst
+description: Analyzes data, identifies patterns, critiques research findings
+capabilities:
+  - data-analysis
+  - pattern-recognition
+  - critique

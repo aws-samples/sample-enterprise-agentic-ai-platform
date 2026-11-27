@@ -1,0 +1,54 @@
+# governance-deploy buildspec — deploys Cedar policies via AWS CLI
+# No Terraform needed — governance team only pushes .cedar files and red-team prompts
+version: 0.2
+
+phases:
+  install:
+    commands:
+      # Managed image (amazonlinux2-x86_64-standard:4.0) ships aws-cli v2 + python3;
+      # nothing to install. (Was `apk add` for the old Alpine-based custom image.)
+      - aws --version
+  pre_build:
+    commands:
+      - echo "=== Syncing red-team prompts to S3 ==="
+      - aws s3 sync red-team/ s3://$ARTIFACTS_BUCKET/red-team/ --delete 2>/dev/null || echo "No red-team folder to sync"
+      - echo "=== Syncing graduation-policy to S3 ==="
+      - aws s3 cp graduation-policy.yaml s3://$ARTIFACTS_BUCKET/graduation-policy.yaml 2>/dev/null || echo "No graduation-policy.yaml"
+  build:
+    commands:
+      - echo "=== Deploying Cedar policies via AWS CLI ==="
+      - |
+        if [ -z "$POLICY_ENGINE_ID" ]; then
+          echo "WARNING: POLICY_ENGINE_ID not set — skipping Cedar policy deployment"
+          exit 0
+        fi
+      - |
+        if [ -d "cedar-policies" ]; then
+          for policy_file in $(find cedar-policies -name "*.cedar"); do
+            POLICY_NAME=$(echo "$policy_file" | sed 's|cedar-policies/||' | sed 's|/|-|g' | sed 's|\.cedar||')
+            POLICY_DEF=$(cat "$policy_file")
+            # Skip empty or fully-commented policies
+            if echo "$POLICY_DEF" | grep -qv "^//"; then
+              echo "  Deploying policy: $POLICY_NAME"
+              aws bedrock-agentcore-control create-policy \
+                --policy-engine-identifier "$POLICY_ENGINE_ID" \
+                --name "$POLICY_NAME" \
+                --definition "$POLICY_DEF" \
+                --region "$AWS_DEFAULT_REGION" 2>&1 || \
+              aws bedrock-agentcore-control update-policy \
+                --policy-engine-identifier "$POLICY_ENGINE_ID" \
+                --name "$POLICY_NAME" \
+                --definition "$POLICY_DEF" \
+                --region "$AWS_DEFAULT_REGION" 2>&1 || \
+              echo "  WARNING: Failed to deploy $POLICY_NAME (API may not be available yet)"
+            else
+              echo "  Skipping $POLICY_NAME (commented out)"
+            fi
+          done
+        else
+          echo "No cedar-policies directory found"
+        fi
+      - echo "=== Cedar policy deployment complete ==="
+artifacts:
+  files:
+    - '**/*'

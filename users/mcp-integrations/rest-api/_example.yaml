@@ -1,0 +1,39 @@
+# Example REST API targets (uncomment and customize)
+#
+# --- API Gateway with IAM auth (default) ---
+#
+# name: internal-crm
+# type: rest_api
+# description: Internal CRM API
+# api_gateway:
+#   api_id: abc123def
+#   stage: prod
+# credential_type: gateway_iam_role
+#
+# --- API Gateway with API key ---
+#
+# name: partner-api
+# type: rest_api
+# description: Partner integration API
+# api_gateway:
+#   api_id: xyz789
+#   stage: prod
+# credential_type: api_key
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:partner-api-key
+#   credential_location: HEADER
+#   credential_parameter_name: x-api-key
+#
+# --- API Gateway with OAuth ---
+#
+# name: salesforce-api
+# type: rest_api
+# description: Salesforce CRM integration
+# api_gateway:
+#   api_id: sf456
+#   stage: prod
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:salesforce-oauth
+#   scopes: [api, refresh_token]
+#   grant_type: authorization_code

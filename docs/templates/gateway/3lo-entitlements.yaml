@@ -1,0 +1,47 @@
+# ⚠️  FUTURE — NOT YET BUILT
+#
+# 3LO (Three-Legged OAuth) Target Template
+# Owner: Shared Services Team
+#
+# For data sources that enforce user-level entitlements.
+# Gateway uses AgentCore Identity Token Vault to acquire per-user tokens.
+# The data source sees the user's identity, not the agent's.
+#
+# Prerequisites (to be built):
+#   1. Consent UI — redirects user to resource's OAuth login
+#   2. Token Vault registration — register resource as OAuth provider
+#   3. Resource OAuth config — resource accepts tokens from AgentCore Identity
+#
+# Why 3LO over header propagation:
+#   - Cryptographic proof of user identity (not a spoofable header)
+#   - Scoped access (read vs write, specific datasets)
+#   - User consent is explicit and auditable
+#   - Token refresh handled automatically by Token Vault
+
+# --- Snowflake (row-level security per user) ---
+
+# name: snowflake-warehouse
+# type: rest_api  # or mcp_server if hosted MCP endpoint exists
+# description: Enterprise Snowflake — user-level data entitlements via 3LO
+# api_gateway:
+#   api_id: <snowflake-proxy-api-id>
+#   stage: prod
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:snowflake-oauth
+#   scopes: [session:role:analyst, refresh_token]
+#   grant_type: authorization_code   # <-- 3LO: user consents, not service-to-service
+
+# --- SharePoint (document-level access per user) ---
+
+# name: sharepoint-docs
+# type: rest_api
+# description: SharePoint — user-level document access via 3LO
+# api_gateway:
+#   api_id: <sharepoint-proxy-api-id>
+#   stage: prod
+# credential_type: oauth
+# credential_config:
+#   provider_arn: arn:aws:secretsmanager:us-east-1:123456789:secret:sharepoint-oauth
+#   scopes: [Files.Read, Sites.Read.All]
+#   grant_type: authorization_code

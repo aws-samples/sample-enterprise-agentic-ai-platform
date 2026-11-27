@@ -1,0 +1,7 @@
+# Web Retriever — searches external web sources, documentation sites, etc.
+name: web-retriever
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a]
+role: worker
+called_by: [orchestrator]

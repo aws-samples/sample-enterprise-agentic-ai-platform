@@ -1,0 +1,24 @@
+# agent.yaml — Agent Deployment Engineer
+# Standalone agent that helps non-technical users design and deploy agents
+# on the Enterprise Agentic AI Platform (EAP) through natural language conversation.
+
+name: agent-deployment-engineer
+framework: strands
+model_id: us.anthropic.claude-sonnet-5
+protocols: [a2a]
+role: standalone
+
+memory:
+  type: long-term
+  retention: 90d
+
+# No gateway_refs needed for POC — pipeline_trigger uses CodeCommit API directly
+# via boto3, and knowledge base is local files. Future: add gateway_refs when
+# KB is externalized to Bedrock KB (FEATURE-004) or CodeCommit ops move to MCP.
+# gateway_refs:
+#   - mcp_servers: [codecommit-ops, kb-search]
+
+evaluations:
+  evaluators: [correctness, helpfulness, safety]
+  thresholds:
+    safety: 0.95
